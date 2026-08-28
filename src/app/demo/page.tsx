@@ -1,129 +1,131 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { BRAND_NAME, PRODUCTS } from "@/data/products";
 import { track } from "@/lib/analytics";
 import { ensureSession } from "@/lib/session";
 import type { Variant } from "@/lib/types";
-import { LinkButton, priceText } from "@/components/ui";
 import { ProductThumb } from "@/components/ProductThumb";
+import { priceText } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 
-export default function Landing() {
-  // ⚠️ null 로 시작합니다. 서버에서는 variant 를 알 수 없으므로
-  //    확정 전에는 스켈레톤을 보여줘야 hydration 이 깨지지 않습니다.
+/**
+ * 샘플 광고 랜딩 — 대시보드가 읽는 이벤트가 여기서 발생합니다.
+ *
+ * A안 「기존 상세형」 : 상품 정보 위주. 스펙을 나열하고 판단은 사용자에게 맡깁니다.
+ * B안 「혜택 강조형」 : 할인율·후기·마감을 앞세워 결정을 돕습니다.
+ *
+ * 대시보드의 A/B 카드에 나오는 이름과 같은 안입니다.
+ */
+export default function DemoLanding() {
+  const router = useRouter();
   const [variant, setVariant] = useState<Variant | null>(null);
 
   useEffect(() => {
     const { variant: v } = ensureSession();
-    // A/B 배정은 브라우저에만 있는 값(localStorage)이라 마운트 후에만 알 수 있습니다.
-    // 서버에서 읽으면 hydration 이 깨지면서 배정이 뒤섞여 실험이 오염됩니다.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 클라이언트 전용 값
     setVariant(v);
     track("page_view", { page_path: "/demo" });
   }, []);
 
-  if (!variant) return <Skeleton />;
+  function openProduct(id: number, position: number) {
+    track("view_product", { product_id: id, position });
+    router.push(`/demo/product?id=${id}`);
+  }
 
-  return variant === "B" ? <VersionB /> : <VersionA />;
-}
+  if (!variant) return <div className="min-h-dvh" />;
 
-function Skeleton() {
+  const isB = variant === "B";
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="aspect-square w-full bg-line/60" />
-      <div className="flex flex-col gap-3 p-6">
-        <div className="h-6 w-2/3 rounded bg-line/60" />
-        <div className="h-6 w-1/2 rounded bg-line/60" />
-      </div>
-    </div>
-  );
-}
+    <main className="fade-up flex min-h-dvh flex-col pb-8">
+      <DemoBanner variant={variant} />
 
-/* ────────────── Version A · 대조군 : 상품 나열 ────────────── */
-
-function VersionA() {
-  return (
-    <main className="fade-up flex min-h-dvh flex-col">
-      <header className="px-6 pt-8 pb-5">
-        <p className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase">
+      {/* 히어로 */}
+      <header className="px-5 pt-6 pb-5">
+        <p className="font-mono text-[10px] tracking-[0.18em] text-muted uppercase">
           {BRAND_NAME}
         </p>
-        <h1 className="mt-2 text-[27px] leading-tight font-extrabold tracking-tight">
-          받는 분이 기억하는
-          <br />
-          연말 선물
-        </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          정성껏 만든 선물 세트를 준비했습니다.
-        </p>
+
+        {isB ? (
+          <>
+            <span className="mt-2.5 inline-block rounded-full bg-brand-soft px-3 py-1.5 text-[12.5px] font-bold text-brand">
+              오늘까지 최대 32% 할인
+            </span>
+            <h1 className="mt-3 text-[28px] leading-tight font-extrabold tracking-tight">
+              사놓고 매일 쓰는 것만
+              <br />
+              모았습니다
+            </h1>
+            <p className="mt-2.5 text-[14.5px] leading-relaxed text-muted">
+              평점 4.5 이상 · 후기 400건 이상인 제품만 골랐습니다.
+              <strong className="text-ink"> 오늘 주문하면 내일 도착합니다.</strong>
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="mt-2.5 text-[26px] leading-tight font-bold tracking-tight">
+              생활용품 기획전
+            </h1>
+            <p className="mt-2.5 text-[14.5px] leading-relaxed text-muted">
+              주방·의류·수납·뷰티 카테고리 6종을 준비했습니다. 상세 정보를 확인하고
+              선택하세요.
+            </p>
+          </>
+        )}
       </header>
 
-      <div className="grid grid-cols-2 gap-3 px-6">
-        {PRODUCTS.slice(0, 6).map((p) => (
-          <article
-            key={p.id}
-            className="overflow-hidden rounded-xl border border-line bg-card"
-          >
-            <ProductThumb product={p} size={200} />
-            <div className="p-3">
-              <h2 className="text-[13.5px] leading-snug font-bold">{p.name}</h2>
-              <p className="mt-1 font-mono text-[12.5px]">{priceText(p.price)}</p>
-            </div>
-          </article>
-        ))}
-      </div>
+      {/* 상품 목록 */}
+      <div className="grid grid-cols-2 gap-3 px-5">
+        {PRODUCTS.map((p, i) => {
+          const off = Math.round((1 - p.price / p.listPrice) * 100);
+          return (
+            <article
+              key={p.id}
+              className="overflow-hidden rounded-xl border border-line bg-card"
+            >
+              <button
+                type="button"
+                onClick={() => openProduct(p.id, i + 1)}
+                className="block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                <div className="relative">
+                  <ProductThumb product={p} size={200} />
+                  {isB && (
+                    <span className="absolute top-2 left-2 rounded bg-brand px-1.5 py-0.5 font-mono text-[10px] font-bold text-white">
+                      {off}%
+                    </span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h2 className="text-[13.5px] leading-snug font-bold">{p.name}</h2>
 
-      <div className="mt-auto p-6">
-        <LinkButton
-          href="/quiz"
-          onClick={() => track("quiz_start", { from: "landing_a" })}
-        >
-          구매하기
-        </LinkButton>
-      </div>
-    </main>
-  );
-}
-
-/* ────────────── Version B · 실험군 : 퀴즈 우선 ────────────── */
-
-function VersionB() {
-  return (
-    <main className="fade-up flex min-h-dvh flex-col">
-      <div
-        className="flex aspect-square w-full items-center justify-center"
-        style={{
-          background:
-            "linear-gradient(150deg, #F3E7D8 0%, #E4CBB4 55%, #D8B79C 100%)",
-        }}
-      >
-        <span className="font-mono text-[11px] tracking-[0.2em] text-[#9C7F63]">
-          GIFTLY
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-3.5 px-6 pt-6">
-        <span className="self-start rounded-full bg-brand-soft px-3 py-1.5 text-[12.5px] font-bold text-brand">
-          ⏱ 90초면 끝납니다
-        </span>
-        <h1 className="text-[30px] leading-tight font-extrabold tracking-tight">
-          올해 연말 선물,
-          <br />
-          아직 안 정하셨죠?
-        </h1>
-        <p className="text-[15px] leading-relaxed text-muted">
-          받는 분과의 관계, 예산, 취향만 알려주시면 딱 맞는 선물 3가지를
-          골라드립니다. 회원가입 없이 바로 시작하세요.
-        </p>
-      </div>
-
-      <div className="mt-auto p-6">
-        <LinkButton
-          href="/quiz"
-          onClick={() => track("quiz_start", { from: "landing_b" })}
-        >
-          90초 만에 선물 찾기
-        </LinkButton>
+                  {isB ? (
+                    <>
+                      <p className="mt-1 text-[11.5px] text-muted">
+                        ★ {p.rating} · 후기 {p.reviewCount.toLocaleString("ko-KR")}
+                      </p>
+                      <p className="mt-1 font-mono text-[13px] font-bold text-brand">
+                        {priceText(p.price)}
+                        <span className="ml-1.5 font-normal text-muted line-through">
+                          {priceText(p.listPrice)}
+                        </span>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-1 line-clamp-2 text-[11.5px] leading-snug text-muted">
+                        {p.tagline}
+                      </p>
+                      <p className="mt-1 font-mono text-[13px]">{priceText(p.price)}</p>
+                    </>
+                  )}
+                </div>
+              </button>
+            </article>
+          );
+        })}
       </div>
     </main>
   );
