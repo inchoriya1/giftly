@@ -54,7 +54,7 @@ export function buildInsights(ind: Industry): Insight[] {
       category: "예산",
       title: `${eul(`${worst.name} 예산`)} ${ro(best.name)} 옮기세요`,
       evidence: `ROAS가 ${best.name} ${pct(best.roas, 0)} vs ${worst.name} ${pct(worst.roas, 0)}로 ${pct(gap, 0)}p 벌어져 있습니다. 같은 1만원이 ${best.name}에서 더 많은 매출을 만듭니다.`,
-      action: `${worst.name} 일예산의 30%(${won(move)})를 ${best.name}으로 이관하고 2주간 유지합니다.`,
+      action: `${worst.name} 일예산의 30%(${won(move)})를 ${ro(best.name)} 이관하고 2주간 유지합니다.`,
       effect: `추가 매출 약 ${won(gain)} 예상 — 이관액 ${won(move)} × ROAS 차이 ${pct(gap, 0)}p. 채널 간 성과가 선형으로 유지된다는 가정이라 실제로는 더 작을 수 있습니다.`,
       metrics: [
         { label: `${best.name} ROAS`, value: pct(best.roas, 0) },
