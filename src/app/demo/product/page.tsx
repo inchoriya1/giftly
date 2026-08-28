@@ -6,9 +6,10 @@ import { findProduct, PRODUCTS } from "@/data/products";
 import { track } from "@/lib/analytics";
 import { addToCart, ensureSession, readCart } from "@/lib/session";
 import type { Variant } from "@/lib/types";
-import { ProductThumb } from "@/components/ProductThumb";
+import { ProductArt } from "@/components/ProductArt";
 import { priceText } from "@/components/ui";
 import { StoreHeader } from "@/components/StoreChrome";
+import { IconMinus, IconPlus, IconStar } from "@/components/icons";
 
 export default function ProductPage() {
   return (
@@ -60,7 +61,7 @@ function ProductDetail() {
       />
 
       {/* 이미지 */}
-      <ProductThumb product={product} size={420} />
+      <ProductArt product={product} size={420} />
       <div className="flex justify-center gap-1.5 py-2.5">
         {[0, 1, 2, 3].map((i) => (
           <span
@@ -87,7 +88,16 @@ function ProductDetail() {
         </div>
 
         <div className="flex items-center gap-1.5 text-[12px]">
-          <span className="font-semibold text-ink">★ {product.rating}</span>
+          <span className="flex items-center gap-0.5 text-[#e0a01a]">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <IconStar
+                key={i}
+                size={12}
+                className={i < Math.round(product.rating) ? "" : "text-line"}
+              />
+            ))}
+          </span>
+          <span className="font-semibold text-ink">{product.rating}</span>
           <span className="text-muted">
             후기 {product.reviewCount.toLocaleString("ko-KR")}건
           </span>
@@ -127,10 +137,10 @@ function ProductDetail() {
               type="button"
               onClick={() => setQty((q) => Math.max(1, q - 1))}
               aria-label="수량 줄이기"
-              className="flex h-7 w-7 items-center justify-center rounded border border-line text-[15px] disabled:opacity-40"
+              className="flex h-7 w-7 items-center justify-center rounded border border-line disabled:opacity-40"
               disabled={qty <= 1}
             >
-              −
+              <IconMinus />
             </button>
             <span className="w-5 text-center font-mono text-[14px] font-semibold tabular-nums">
               {qty}
@@ -139,9 +149,9 @@ function ProductDetail() {
               type="button"
               onClick={() => setQty((q) => Math.min(9, q + 1))}
               aria-label="수량 늘리기"
-              className="flex h-7 w-7 items-center justify-center rounded border border-line text-[15px]"
+              className="flex h-7 w-7 items-center justify-center rounded border border-line"
             >
-              +
+              <IconPlus />
             </button>
           </div>
         </div>
@@ -237,7 +247,7 @@ function ProductDetail() {
               }}
               className="text-left"
             >
-              <ProductThumb product={p} size={110} className="rounded-lg" />
+              <ProductArt product={p} size={110} className="rounded-lg" />
               <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-snug">{p.name}</p>
               <p className="mt-0.5 font-mono text-[11.5px] font-semibold">
                 {priceText(p.price)}

@@ -14,9 +14,10 @@ import {
 } from "@/lib/session";
 import { supabase } from "@/lib/supabase/client";
 import type { Product, Variant } from "@/lib/types";
-import { ProductThumb } from "@/components/ProductThumb";
+import { ProductArt } from "@/components/ProductArt";
 import { priceText } from "@/components/ui";
 import { StoreHeader } from "@/components/StoreChrome";
+import { IconMinus, IconPlus } from "@/components/icons";
 
 const FREE_SHIP = 30000;
 const SHIP_FEE = 3000;
@@ -125,7 +126,7 @@ export default function CartPage() {
       {/* 품목 */}
       <div className="mt-3 border-y border-line bg-card px-4 py-3.5">
         <div className="grid grid-cols-[76px_1fr] gap-3">
-          <ProductThumb product={product} size={76} className="rounded-lg" />
+          <ProductArt product={product} size={76} className="rounded-lg" />
           <div>
             <h2 className="text-[13.5px] leading-snug font-semibold">{product.name}</h2>
             <p className="mt-0.5 text-[11.5px] text-muted">{product.tagline}</p>
@@ -137,9 +138,9 @@ export default function CartPage() {
                   onClick={() => changeQty(qty - 1)}
                   disabled={qty <= 1}
                   aria-label="수량 줄이기"
-                  className="flex h-6 w-6 items-center justify-center rounded border border-line text-[14px] disabled:opacity-40"
+                  className="flex h-6 w-6 items-center justify-center rounded border border-line disabled:opacity-40"
                 >
-                  −
+                  <IconMinus size={14} />
                 </button>
                 <span className="w-4 text-center font-mono text-[13px] tabular-nums">
                   {qty}
@@ -148,9 +149,9 @@ export default function CartPage() {
                   type="button"
                   onClick={() => changeQty(qty + 1)}
                   aria-label="수량 늘리기"
-                  className="flex h-6 w-6 items-center justify-center rounded border border-line text-[14px]"
+                  className="flex h-6 w-6 items-center justify-center rounded border border-line"
                 >
-                  +
+                  <IconPlus size={14} />
                 </button>
               </div>
               <span className="font-mono text-[14px] font-bold">{priceText(goods)}</span>

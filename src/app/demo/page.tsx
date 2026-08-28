@@ -6,9 +6,10 @@ import { PRODUCTS } from "@/data/products";
 import { track } from "@/lib/analytics";
 import { ensureSession, readCart } from "@/lib/session";
 import type { Variant } from "@/lib/types";
-import { ProductThumb } from "@/components/ProductThumb";
+import { ProductArt } from "@/components/ProductArt";
 import { priceText } from "@/components/ui";
-import { StoreFooter, StoreHeader } from "@/components/StoreChrome";
+import { BottomTabs, StoreFooter, StoreHeader } from "@/components/StoreChrome";
+import { IconStar, IconTruck } from "@/components/icons";
 
 /**
  * 샘플 광고 랜딩 — 대시보드가 읽는 이벤트가 여기서 발생합니다.
@@ -42,7 +43,7 @@ export default function DemoLanding() {
   }
 
   return (
-    <main className="fade-up flex min-h-dvh flex-col bg-paper">
+    <main className="fade-up flex min-h-dvh flex-col bg-paper pb-[60px]">
       <StoreHeader variant={variant} cartCount={cartCount} />
 
       {/* 배너 */}
@@ -112,8 +113,8 @@ export default function DemoLanding() {
                 onClick={() => open(p.id, i + 1)}
                 className="block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
-                <div className="relative overflow-hidden rounded-lg">
-                  <ProductThumb product={p} size={200} />
+                <div className="relative overflow-hidden rounded-lg border border-line/60">
+                  <ProductArt product={p} size={200} />
                   {isB && (
                     <span className="absolute top-2 left-2 rounded bg-brand px-1.5 py-[2px] font-mono text-[10px] font-bold text-white">
                       {off}%
@@ -142,14 +143,15 @@ export default function DemoLanding() {
                       <p className="font-mono text-[11px] text-muted line-through">
                         {priceText(p.listPrice)}
                       </p>
-                      <p className="mt-1 text-[11px] text-muted">
-                        ★ {p.rating}{" "}
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-muted">
+                        <IconStar className="text-[#e0a01a]" />
+                        <span className="font-semibold text-ink">{p.rating}</span>
                         <span className="text-muted/70">
                           ({p.reviewCount.toLocaleString("ko-KR")})
                         </span>
                       </p>
-                      <span className="mt-1.5 inline-block rounded bg-brand-soft px-1.5 py-[1px] text-[10px] font-semibold text-brand">
-                        내일 도착
+                      <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-brand-soft px-1.5 py-[2px] text-[10px] font-semibold text-brand">
+                        <IconTruck size={12} /> 내일 도착
                       </span>
                     </>
                   ) : (
@@ -160,8 +162,9 @@ export default function DemoLanding() {
                       <p className="mt-1.5 font-mono text-[13.5px] font-semibold">
                         {priceText(p.price)}
                       </p>
-                      <p className="mt-1 text-[11px] text-muted">
-                        ★ {p.rating} · 후기 {p.reviewCount.toLocaleString("ko-KR")}
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-muted">
+                        <IconStar className="text-[#c9b8a0]" />
+                        {p.rating} · 후기 {p.reviewCount.toLocaleString("ko-KR")}
                       </p>
                     </>
                   )}
@@ -173,6 +176,7 @@ export default function DemoLanding() {
       </div>
 
       <StoreFooter />
+      <BottomTabs cartCount={cartCount} />
     </main>
   );
 }

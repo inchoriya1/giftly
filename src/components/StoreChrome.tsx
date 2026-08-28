@@ -3,12 +3,21 @@
 import Link from "next/link";
 import { BRAND_NAME } from "@/data/products";
 import type { Variant } from "@/lib/types";
+import {
+  IconBack,
+  IconCart,
+  IconGrid,
+  IconHome,
+  IconMenu,
+  IconSearch,
+  IconUser,
+} from "@/components/icons";
 
 /* ────────────────────────────────────────────────────────────
-   상점 크롬 — 헤더 + 카테고리 바
+   상점 크롬
 
    실제 커머스처럼 보이되, 실제 판매로 오인되면 안 됩니다.
-   그래서 최상단에 계속 「샘플」 띠를 답니다.
+   진짜처럼 만들수록 최상단 「샘플」 띠가 더 중요해집니다.
    ──────────────────────────────────────────────────────────── */
 
 const CATEGORIES = ["전체", "주방", "의류", "수납", "뷰티", "디지털", "운동"];
@@ -23,7 +32,7 @@ export function DemoStrip({ variant }: { variant: Variant }) {
         측정용 가상 페이지 · 실제 판매하지 않습니다
       </p>
       <span className="font-mono text-[10px] text-white/50">
-        {variant}안 {variant === "B" ? "혜택 강조형" : "기존 상세형"}
+        {variant}안 {variant === "B" ? "혜택" : "기본"}
       </span>
       <Link
         href="/"
@@ -39,57 +48,61 @@ export function StoreHeader({
   variant,
   cartCount = 0,
   back,
+  title,
 }: {
   variant: Variant;
   cartCount?: number;
   back?: { href: string; label: string };
+  title?: string;
 }) {
   return (
     <>
       <DemoStrip variant={variant} />
 
       <header className="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
-        <div className="flex h-[46px] items-center gap-2.5 px-4">
+        <div className="flex h-[48px] items-center gap-2 px-3.5">
           {back ? (
             <Link
               href={back.href}
               aria-label={back.label}
-              className="-ml-1 flex h-7 w-7 items-center justify-center text-[17px] text-ink"
+              className="-ml-1.5 flex h-8 w-8 items-center justify-center text-ink"
             >
-              ‹
+              <IconBack />
             </Link>
           ) : (
             <button
               type="button"
               aria-label="메뉴"
-              className="-ml-1 flex h-7 w-7 flex-col items-center justify-center gap-[3px]"
+              className="-ml-1.5 flex h-8 w-8 items-center justify-center text-ink"
             >
-              <span className="block h-[1.5px] w-[15px] bg-ink" />
-              <span className="block h-[1.5px] w-[15px] bg-ink" />
-              <span className="block h-[1.5px] w-[15px] bg-ink" />
+              <IconMenu />
             </button>
           )}
 
-          <Link href="/demo" className="text-[15px] font-extrabold tracking-tight">
-            {BRAND_NAME}
-          </Link>
+          {title ? (
+            <h1 className="text-[15px] font-bold tracking-tight">{title}</h1>
+          ) : (
+            <Link href="/demo" className="text-[16px] font-extrabold tracking-tight">
+              {BRAND_NAME}
+            </Link>
+          )}
 
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-0.5">
             <button
               type="button"
               aria-label="검색"
-              className="flex h-7 w-7 items-center justify-center text-[15px] text-ink/70"
+              className="flex h-8 w-8 items-center justify-center text-ink/75"
             >
-              ⌕
+              <IconSearch />
             </button>
             <Link
               href="/demo/cart"
-              aria-label="장바구니"
-              className="relative flex h-7 w-7 items-center justify-center text-[15px] text-ink/70"
+              aria-label={`장바구니 ${cartCount}개`}
+              className="relative flex h-8 w-8 items-center justify-center text-ink/75"
             >
-              ⌂
+              <IconCart />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-brand px-[3px] font-mono text-[9px] font-bold text-white">
+                <span className="absolute top-0.5 right-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-brand px-[3.5px] font-mono text-[9px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
@@ -97,23 +110,68 @@ export function StoreHeader({
           </div>
         </div>
 
-        <nav className="flex gap-4 overflow-x-auto border-t border-line/70 px-4 py-2">
-          {CATEGORIES.map((c, i) => (
-            <button
-              key={c}
-              type="button"
-              className={`shrink-0 pb-[3px] text-[12.5px] whitespace-nowrap ${
-                i === 0
-                  ? "border-b-[1.5px] border-ink font-bold text-ink"
-                  : "text-muted"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </nav>
+        {!back && (
+          <nav className="flex gap-4 overflow-x-auto border-t border-line/70 px-3.5 py-2">
+            {CATEGORIES.map((c, i) => (
+              <button
+                key={c}
+                type="button"
+                className={`shrink-0 pb-[3px] text-[12.5px] whitespace-nowrap ${
+                  i === 0
+                    ? "border-b-[1.5px] border-ink font-bold text-ink"
+                    : "text-muted"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
     </>
+  );
+}
+
+/** 하단 탭 — 목록 화면에만 답니다. 상세·장바구니는 구매 바가 대신합니다. */
+export function BottomTabs({ cartCount = 0 }: { cartCount?: number }) {
+  const tabs = [
+    { icon: <IconHome />, label: "홈", active: true, href: "/demo" },
+    { icon: <IconGrid />, label: "카테고리" },
+    { icon: <IconSearch />, label: "검색" },
+    { icon: <IconCart />, label: "장바구니", href: "/demo/cart", badge: cartCount },
+    { icon: <IconUser />, label: "마이" },
+  ];
+
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[420px] border-t border-line bg-paper/97 backdrop-blur">
+      {tabs.map((t) => {
+        const inner = (
+          <>
+            <span className="relative">
+              {t.icon}
+              {t.badge ? (
+                <span className="absolute -top-1 -right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-brand px-[3px] font-mono text-[8.5px] font-bold text-white">
+                  {t.badge}
+                </span>
+              ) : null}
+            </span>
+            <span className="text-[10px]">{t.label}</span>
+          </>
+        );
+        const cls = `flex flex-1 flex-col items-center gap-[3px] py-2 ${
+          t.active ? "font-semibold text-ink" : "text-muted"
+        }`;
+        return t.href ? (
+          <Link key={t.label} href={t.href} className={cls}>
+            {inner}
+          </Link>
+        ) : (
+          <button key={t.label} type="button" className={cls}>
+            {inner}
+          </button>
+        );
+      })}
+    </nav>
   );
 }
 
