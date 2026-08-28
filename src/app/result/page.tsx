@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BRAND_NAME } from "@/data/products";
@@ -11,7 +11,8 @@ import { recommend } from "@/lib/recommend";
 import { ensureSession, loadAnswers, resetFlow } from "@/lib/session";
 import { supabase } from "@/lib/supabase/client";
 import type { Answers, Scored } from "@/lib/types";
-import { Button, Placeholder, priceText } from "@/components/ui";
+import { Button, priceText } from "@/components/ui";
+import { ProductThumb } from "@/components/ProductThumb";
 
 export default function Result() {
   const router = useRouter();
@@ -121,17 +122,7 @@ export default function Result() {
             key={p.id}
             className="grid grid-cols-[78px_1fr] items-center gap-3.5 rounded-xl border border-line bg-card p-3"
           >
-            {p.image ? (
-              <Image
-                src={p.image}
-                alt={p.name}
-                width={78}
-                height={78}
-                className="aspect-square rounded-lg object-cover"
-              />
-            ) : (
-              <Placeholder className="aspect-square rounded-lg" />
-            )}
+            <ProductThumb product={p} size={78} className="rounded-lg" />
             <div>
               <h2 className="text-[15px] font-bold">
                 <span className="mr-1.5 rounded bg-brand px-1.5 py-0.5 font-mono text-[10px] text-white">

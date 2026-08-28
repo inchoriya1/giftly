@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { BRAND_NAME, PRODUCTS } from "@/data/products";
 import { track } from "@/lib/analytics";
 import { ensureSession } from "@/lib/session";
 import type { Variant } from "@/lib/types";
-import { LinkButton, Placeholder, priceText } from "@/components/ui";
+import { LinkButton, priceText } from "@/components/ui";
+import { ProductThumb } from "@/components/ProductThumb";
 
 export default function Landing() {
   // ⚠️ null 로 시작합니다. 서버에서는 variant 를 알 수 없으므로
@@ -64,17 +64,7 @@ function VersionA() {
             key={p.id}
             className="overflow-hidden rounded-xl border border-line bg-card"
           >
-            {p.image ? (
-              <Image
-                src={p.image}
-                alt={p.name}
-                width={200}
-                height={200}
-                className="aspect-square w-full object-cover"
-              />
-            ) : (
-              <Placeholder className="aspect-square w-full" />
-            )}
+            <ProductThumb product={p} size={200} />
             <div className="p-3">
               <h2 className="text-[13.5px] leading-snug font-bold">{p.name}</h2>
               <p className="mt-1 font-mono text-[12.5px]">{priceText(p.price)}</p>
@@ -100,7 +90,17 @@ function VersionA() {
 function VersionB() {
   return (
     <main className="fade-up flex min-h-dvh flex-col">
-      <Placeholder label="HERO 1:1" className="aspect-square w-full" />
+      <div
+        className="flex aspect-square w-full items-center justify-center"
+        style={{
+          background:
+            "linear-gradient(150deg, #F3E7D8 0%, #E4CBB4 55%, #D8B79C 100%)",
+        }}
+      >
+        <span className="font-mono text-[11px] tracking-[0.2em] text-[#9C7F63]">
+          GIFTLY
+        </span>
+      </div>
 
       <div className="flex flex-col gap-3.5 px-6 pt-6">
         <span className="self-start rounded-full bg-brand-soft px-3 py-1.5 text-[12.5px] font-bold text-brand">
