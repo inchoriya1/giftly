@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger, svg, utils } from "animejs";
+import { canAnimate } from "@/lib/anim";
 
 /* ────────────────────────────────────────────────────────────
-   인라인 SVG 차트
+   인라인 SVG 차트 + anime.js
 
    팔레트는 검증기(validate_palette.js)를 통과한 값만 씁니다.
    - 단일 계열 / 순차: 블루 #2a78d6
-   - 퍼널 순서형 5단계: #86b6ef → #104281 (단일 색상, 명도 단조)
+   - 퍼널 순서형 5단계: #86b6ef → #104281 (단일 색조, 명도 단조)
    - A/B 2계열: #2a78d6 · #008300 (CVD ΔE 26.5 · 일반시야 ΔE 29.0)
-   차트 크롬은 눈에 띄지 않게: 그리드 #e1e0d9, 축 #c3c2b7, 라벨 #898781
+
+   애니메이션은 "값이 자리를 잡는" 정도까지만 합니다.
+   데이터가 바뀔 때(업종 전환) 한 번 재생되고 멈춥니다.
    ──────────────────────────────────────────────────────────── */
 
 const INK = "#0b0b0b";
@@ -19,6 +23,38 @@ const AXIS = "#c3c2b7";
 const BLUE = "#2a78d6";
 const GREEN = "#008300";
 const FUNNEL_RAMP = ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#104281"];
+
+/** 막대·셀을 0에서 목표치까지 채웁니다. 순서대로 스태거. */
+function fillBars(
+  root: HTMLElement | null,
+  selector: string,
+  prop: "width" | "height" = "width",
+) {
+  if (!root) return;
+  const bars = Array.from(root.querySelectorAll<HTMLElement>(selector));
+  if (!bars.length) return;
+
+  const targets = bars.map((el) => ({ el, to: el.dataset.to ?? "0%" }));
+  const settle = () => targets.forEach(({ el, to }) => (el.style[prop] = to));
+
+  // 재생할 수 없으면 목표치를 즉시 확정합니다. 0%에 갇히면 안 됩니다.
+  if (!canAnimate()) {
+    settle();
+    return;
+  }
+
+  // 요소마다 목표치가 달라 개별로 겁니다. 지연을 직접 주어 스태거를 만듭니다.
+  const DUR = 720;
+  targets.forEach(({ el, to }, i) => {
+    el.style[prop] = "0%";
+    const common = { duration: DUR, delay: i * 55, ease: "outExpo" } as const;
+    if (prop === "width") animate(el, { width: to, ...common });
+    else animate(el, { height: to, ...common });
+  });
+
+  const guard = setTimeout(settle, DUR + targets.length * 55 + 400);
+  return () => clearTimeout(guard);
+}
 
 function Tip({ left, top, lines }: { left: string; top: string; lines: string[] }) {
   return (
@@ -35,7 +71,7 @@ function Tip({ left, top, lines }: { left: string; top: string; lines: string[] 
   );
 }
 
-/* ── 시계열 (단일 계열이므로 범례 없음 — 제목이 계열을 지칭) ── */
+/* ── 시계열 — 선이 왼쪽에서 그려집니다 ── */
 
 export function LineChart({
   data,
@@ -49,6 +85,9 @@ export function LineChart({
   unit?: string;
 }) {
   const [hover, setHover] = useState<number | null>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  const areaRef = useRef<SVGPathElement>(null);
+
   const W = 640;
   const H = height;
   const P = { t: 14, r: 12, b: 22, l: 44 };
@@ -63,6 +102,47 @@ export function LineChart({
   const area = `${path} L${x(data.length - 1)},${P.t + ih} L${P.l},${P.t + ih} Z`;
   const ticks = [0, max / 2, max];
 
+  // 데이터가 바뀌면 다시 그립니다 (업종 전환)
+  const sig = data.map((d) => d.value).join(",");
+
+  useEffect(() => {
+    const p = pathRef.current;
+    const a = areaRef.current;
+    if (!p || !a || !canAnimate()) return;
+
+    // createDrawable 은 stroke-dasharray/offset 으로 선을 감춥니다.
+    // 애니메이션이 끝나지 않으면 선이 영영 안 보이므로 되돌릴 수 있게 해둡니다.
+    const settle = () => {
+      p.style.strokeDasharray = "";
+      p.style.strokeDashoffset = "";
+      a.style.opacity = "";
+    };
+
+    const drawable = svg.createDrawable(p);
+    const anim = animate(drawable, {
+      draw: ["0 0", "0 1"],
+      duration: 900,
+      ease: "inOutQuad",
+      onComplete: settle,
+    });
+    const fade = animate(a, {
+      opacity: [0, 0.08],
+      duration: 900,
+      ease: "outQuad",
+    });
+
+    const guard = setTimeout(settle, 1400);
+
+    return () => {
+      clearTimeout(guard);
+      anim.pause();
+      fade.pause();
+      utils.remove(p);
+      utils.remove(a);
+      settle();
+    };
+  }, [sig]);
+
   return (
     <div className="relative">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img">
@@ -74,8 +154,16 @@ export function LineChart({
             </text>
           </g>
         ))}
-        <path d={area} fill={BLUE} opacity="0.08" />
-        <path d={path} fill="none" stroke={BLUE} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        <path ref={areaRef} d={area} fill={BLUE} opacity="0.08" />
+        <path
+          ref={pathRef}
+          d={path}
+          fill="none"
+          stroke={BLUE}
+          strokeWidth="2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
         {data.map((d, i) =>
           i % 7 === 0 ? (
             <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fontSize="10" fill={MUTED}>
@@ -113,24 +201,29 @@ export function LineChart({
   );
 }
 
-/* ── 채널별 가로 막대 (단일 측정치 = 단일 색) ── */
+/* ── 채널별 가로 막대 ── */
 
 export function BarH({
   data,
   format,
   highlightBest = "high",
 }: {
-  data: { label: string; value: number; sub?: string }[];
+  data: { label: string; value: number }[];
   format: (n: number) => string;
-  /** 좋은 방향 — ROAS는 high, CPA는 low */
   highlightBest?: "high" | "low";
 }) {
+  const root = useRef<HTMLDivElement>(null);
   const max = Math.max(...data.map((d) => d.value));
   const bestVal =
     highlightBest === "high" ? max : Math.min(...data.map((d) => d.value));
+  const sig = data.map((d) => Math.round(d.value)).join(",");
+
+  useEffect(() => {
+    return fillBars(root.current, "[data-bar]");
+  }, [sig]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={root} className="flex flex-col gap-2">
       {data.map((d) => {
         const isBest = d.value === bestVal;
         return (
@@ -138,6 +231,8 @@ export function BarH({
             <span className="truncate text-[12px] font-semibold">{d.label}</span>
             <div className="h-5 overflow-hidden rounded-[4px] bg-[#f0efec]">
               <div
+                data-bar
+                data-to={`${Math.max((d.value / max) * 100, 2)}%`}
                 className="h-full rounded-[4px]"
                 style={{
                   width: `${Math.max((d.value / max) * 100, 2)}%`,
@@ -158,18 +253,24 @@ export function BarH({
   );
 }
 
-/* ── 퍼널 (순서형 램프) ── */
+/* ── 퍼널 ── */
 
 export function Funnel({
   stages,
 }: {
   stages: { label: string; value: number; dropFromPrev: number }[];
 }) {
+  const root = useRef<HTMLDivElement>(null);
   const max = stages[0].value;
   const worst = Math.max(...stages.slice(1).map((s) => s.dropFromPrev));
+  const sig = stages.map((s) => s.value).join(",");
+
+  useEffect(() => {
+    return fillBars(root.current, "[data-bar]");
+  }, [sig]);
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div ref={root} className="flex flex-col gap-1.5">
       {stages.map((s, i) => {
         const isWorst = i > 0 && s.dropFromPrev === worst;
         return (
@@ -183,6 +284,8 @@ export function Funnel({
             <div className="flex items-center gap-2">
               <div className="h-6 flex-1 rounded-[4px] bg-[#f0efec]">
                 <div
+                  data-bar
+                  data-to={`${(s.value / max) * 100}%`}
                   className="h-full rounded-[4px]"
                   style={{
                     width: `${(s.value / max) * 100}%`,
@@ -190,15 +293,16 @@ export function Funnel({
                   }}
                 />
               </div>
-              {i > 0 && (
+              {i > 0 ? (
                 <span
                   className="w-[52px] text-right font-mono text-[11px] tabular-nums"
                   style={{ color: isWorst ? "#d03b3b" : MUTED, fontWeight: isWorst ? 700 : 400 }}
                 >
                   −{s.dropFromPrev.toFixed(0)}%
                 </span>
+              ) : (
+                <span className="w-[52px]" />
               )}
-              {i === 0 && <span className="w-[52px]" />}
             </div>
           </div>
         );
@@ -210,7 +314,7 @@ export function Funnel({
   );
 }
 
-/* ── 세그먼트 히트맵 (순차 램프) ── */
+/* ── 세그먼트 히트맵 ── */
 
 export function Heatmap({
   rows,
@@ -221,18 +325,52 @@ export function Heatmap({
   cols: string[];
   cells: { row: string; col: string; value: number; sub: string }[];
 }) {
+  const root = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<string | null>(null);
   const max = Math.max(...cells.map((c) => c.value));
   const min = Math.min(...cells.map((c) => c.value));
+  const sig = cells.map((c) => c.value.toFixed(1)).join(",");
+
   const shade = (v: number) => {
     const t = (v - min) / (max - min || 1);
-    // 순차 블루 100→650 사이를 보간
     const stops = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#104281"];
     return stops[Math.min(stops.length - 1, Math.round(t * (stops.length - 1)))];
   };
 
+  useEffect(() => {
+    const el = root.current;
+    if (!el || !canAnimate()) return;
+    const items = el.querySelectorAll<HTMLElement>("[data-cell]");
+    if (!items.length) return;
+
+    // 셀이 투명한 채로 남지 않도록 되돌릴 수단을 먼저 준비합니다.
+    const settle = () =>
+      items.forEach((c) => {
+        c.style.opacity = "";
+        c.style.transform = "";
+      });
+
+    const anim = animate(items, {
+      opacity: [0, 1],
+      scale: [0.9, 1],
+      duration: 420,
+      delay: stagger(35),
+      ease: "outQuad",
+      onComplete: settle,
+    });
+
+    const guard = setTimeout(settle, 420 + items.length * 35 + 400);
+
+    return () => {
+      clearTimeout(guard);
+      anim.pause();
+      utils.remove(items);
+      settle();
+    };
+  }, [sig]);
+
   return (
-    <div className="relative">
+    <div ref={root} className="relative">
       <div
         className="grid gap-[2px]"
         style={{ gridTemplateColumns: `46px repeat(${cols.length}, 1fr)` }}
@@ -254,6 +392,7 @@ export function Heatmap({
               return (
                 <div
                   key={c}
+                  data-cell
                   onMouseEnter={() => setHover(key)}
                   onMouseLeave={() => setHover(null)}
                   className="flex h-9 cursor-default items-center justify-center rounded-[4px] font-mono text-[11px] tabular-nums"
@@ -279,7 +418,7 @@ export function Heatmap({
   );
 }
 
-/* ── A/B 비교 (2계열 — 범례 + 직접 라벨) ── */
+/* ── A/B 비교 ── */
 
 export function AbBars({
   a,
@@ -292,14 +431,20 @@ export function AbBars({
   significant: boolean;
   pValue: number;
 }) {
+  const root = useRef<HTMLDivElement>(null);
   const max = Math.max(a.rate, b.rate) * 1.25;
   const items = [
     { key: "A", color: BLUE, ...a },
     { key: "B", color: GREEN, ...b },
   ];
+  const sig = `${a.rate.toFixed(3)}|${b.rate.toFixed(3)}`;
+
+  useEffect(() => {
+    return fillBars(root.current, "[data-bar]", "height");
+  }, [sig]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={root} className="flex flex-col gap-3">
       <div className="flex gap-4">
         {items.map((it) => (
           <span key={it.key} className="flex items-center gap-1.5 text-[11.5px]">
@@ -318,14 +463,17 @@ export function AbBars({
             <span className="font-mono text-[15px] font-bold tabular-nums">
               {it.rate.toFixed(2)}%
             </span>
-            <div
-              className="w-full rounded-t-[4px]"
-              style={{
-                height: `${(it.rate / max) * 84}px`,
-                background: it.color,
-                minHeight: 6,
-              }}
-            />
+            <div className="flex w-full items-end" style={{ height: 84 }}>
+              <div
+                data-bar
+                data-to={`${Math.max((it.rate / max) * 100, 7)}%`}
+                className="w-full rounded-t-[4px]"
+                style={{
+                  height: `${Math.max((it.rate / max) * 100, 7)}%`,
+                  background: it.color,
+                }}
+              />
+            </div>
             <span className="font-mono text-[11px] text-[#52514e] tabular-nums">
               {it.conversions.toLocaleString("ko-KR")} / {it.sessions.toLocaleString("ko-KR")}
             </span>

@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "motion/react";
 import { INDUSTRIES } from "@/data/mock/generate";
 import { buildInsights, type Priority } from "@/lib/insights";
 import { AbBars, BarH, Funnel, Heatmap, LineChart } from "@/components/charts";
+import { CountUp } from "@/components/CountUp";
+import { fadeUp, staggerParent } from "@/lib/anim";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const man = (n: number) => `${(n / 10000).toFixed(0)}만원`;
@@ -130,20 +133,37 @@ export default function Dashboard() {
       </p>
 
       {/* ── KPI 타일 ── */}
-      <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <motion.section
+        className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4"
+        variants={staggerParent}
+        initial="hidden"
+        animate="show"
+      >
         {[
-          { k: "전환", v: num(ind.totals.conversions), d: ind.deltas.conversions, good: "up" },
-          { k: "CPA", v: won(ind.totals.cpa), d: ind.deltas.cpa, good: "down" },
-          { k: "ROAS", v: `${ind.totals.roas.toFixed(0)}%`, d: ind.deltas.roas, good: "up" },
-          { k: "클릭", v: num(ind.totals.clicks), d: ind.deltas.clicks, good: "up" },
+          { k: "전환", n: ind.totals.conversions, fmt: num, d: ind.deltas.conversions, good: "up" },
+          { k: "CPA", n: ind.totals.cpa, fmt: won, d: ind.deltas.cpa, good: "down" },
+          {
+            k: "ROAS",
+            n: ind.totals.roas,
+            fmt: (v: number) => `${Math.round(v)}%`,
+            d: ind.deltas.roas,
+            good: "up",
+          },
+          { k: "클릭", n: ind.totals.clicks, fmt: num, d: ind.deltas.clicks, good: "up" },
         ].map((t) => {
           const improved = t.good === "up" ? t.d > 0 : t.d < 0;
           return (
-            <div key={t.k} className="rounded-xl border border-line bg-card p-4">
+            <motion.div
+              key={t.k}
+              variants={fadeUp}
+              className="rounded-xl border border-line bg-card p-4"
+            >
               <p className="font-mono text-[10px] tracking-[0.12em] text-muted uppercase">
                 {t.k}
               </p>
-              <p className="mt-1.5 text-[24px] leading-none font-bold">{t.v}</p>
+              <p className="mt-1.5 text-[24px] leading-none font-bold">
+                <CountUp value={t.n} format={t.fmt} />
+              </p>
               <p
                 className="mt-2 font-mono text-[11.5px] tabular-nums"
                 style={{ color: improved ? "#006300" : "#d03b3b" }}
@@ -151,10 +171,10 @@ export default function Dashboard() {
                 {t.d > 0 ? "▲" : "▼"} {Math.abs(t.d).toFixed(1)}%
                 <span className="ml-1 text-muted">직전 14일 대비</span>
               </p>
-            </div>
+            </motion.div>
           );
         })}
-      </section>
+      </motion.section>
 
       {/* ── ⭐ 인사이트 ── */}
       <section className="mb-6">
@@ -167,10 +187,17 @@ export default function Dashboard() {
           <strong className="text-ink">맨 위 하나만 실행해도 됩니다</strong> — 한 번에 다
           바꾸면 무엇이 효과가 있었는지 알 수 없습니다.
         </p>
-        <div className="flex flex-col gap-3">
+        <motion.div
+          key={ind.id}
+          className="flex flex-col gap-3"
+          variants={staggerParent}
+          initial="hidden"
+          animate="show"
+        >
           {insights.map((ins) => (
-            <article
+            <motion.article
               key={ins.id}
+              variants={fadeUp}
               className="rounded-xl border border-line bg-card p-4"
             >
               <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -210,9 +237,9 @@ export default function Dashboard() {
                   </div>
                 )}
               </dl>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* ── 차트 ── */}
