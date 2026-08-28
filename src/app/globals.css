@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-paper: #fbf8f3;
+  --color-card: #ffffff;
+  --color-ink: #1b1714;
+  --color-muted: #7a6e64;
+  --color-line: #e8dfd4;
+  --color-brand: #8e2a20;
+  --color-brand-soft: #f6eae6;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html,
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 모바일 온리 — 데스크톱에서는 가운데 정렬된 좁은 컬럼으로 보여준다 */
+.app-frame {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--color-paper);
+}
+
+@media (min-width: 520px) {
+  body {
+    background: #2a2622;
+  }
+  .app-frame {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.32s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    animation: none;
+  }
 }
