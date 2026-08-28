@@ -1,16 +1,17 @@
 import type { Product } from "@/lib/types";
 
 /**
- * 샘플 광고 랜딩에 쓰는 가상 상품입니다.
+ * 샘플 광고 랜딩에 쓰는 가상 상품 12종.
  *
  * 이 페이지의 목적은 상품을 파는 게 아니라
  * 대시보드가 읽는 이벤트를 실제로 발생시키는 것입니다.
- * 특정 업종에 치우치지 않도록 중립적인 생활용품으로 구성했습니다.
+ * 카테고리당 2종씩 둬서 필터·정렬이 실제로 의미를 갖게 했습니다.
  */
 export const PRODUCTS: Product[] = [
   {
     id: 1,
     name: "데일리 텀블러 500ml",
+    category: "주방",
     price: 24900,
     listPrice: 35000,
     image: "",
@@ -21,7 +22,20 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 2,
+    name: "보온 보냉병 750ml",
+    category: "주방",
+    price: 32900,
+    listPrice: 42000,
+    image: "",
+    tagline: "12시간 보온·보냉 유지",
+    features: ["진공 이중구조", "원터치 개폐", "손잡이 포함"],
+    rating: 4.6,
+    reviewCount: 738,
+  },
+  {
+    id: 3,
     name: "코튼 오버셔츠",
+    category: "의류",
     price: 39900,
     listPrice: 59000,
     image: "",
@@ -31,8 +45,21 @@ export const PRODUCTS: Product[] = [
     reviewCount: 892,
   },
   {
-    id: 3,
+    id: 4,
+    name: "브러시드 후드 스웨트",
+    category: "의류",
+    price: 45900,
+    listPrice: 62000,
+    image: "",
+    tagline: "안쪽 기모로 겨울까지",
+    features: ["기모 안감", "무기모 대비 2배 보온", "5색"],
+    rating: 4.8,
+    reviewCount: 1571,
+  },
+  {
+    id: 5,
     name: "원목 데스크 정리함",
+    category: "수납",
     price: 32000,
     listPrice: 42000,
     image: "",
@@ -42,8 +69,21 @@ export const PRODUCTS: Product[] = [
     reviewCount: 447,
   },
   {
-    id: 4,
+    id: 6,
+    name: "접이식 수납 박스 2개",
+    category: "수납",
+    price: 18900,
+    listPrice: 26000,
+    image: "",
+    tagline: "안 쓸 땐 납작하게",
+    features: ["방수 코팅", "적재 하중 15kg", "2개 세트"],
+    rating: 4.3,
+    reviewCount: 2104,
+  },
+  {
+    id: 7,
     name: "수분 진정 앰플 50ml",
+    category: "뷰티",
     price: 28000,
     listPrice: 38000,
     image: "",
@@ -53,8 +93,21 @@ export const PRODUCTS: Product[] = [
     reviewCount: 2013,
   },
   {
-    id: 5,
+    id: 8,
+    name: "저자극 클렌징 폼",
+    category: "뷰티",
+    price: 15900,
+    listPrice: 21000,
+    image: "",
+    tagline: "당김 없는 약산성 세안",
+    features: ["약산성 pH 5.5", "200ml 대용량", "무향"],
+    rating: 4.4,
+    reviewCount: 3286,
+  },
+  {
+    id: 9,
     name: "휴대용 무선 충전기",
+    category: "디지털",
     price: 34900,
     listPrice: 49000,
     image: "",
@@ -64,8 +117,21 @@ export const PRODUCTS: Product[] = [
     reviewCount: 1567,
   },
   {
-    id: 6,
+    id: 10,
+    name: "블루투스 5.3 이어버드",
+    category: "디지털",
+    price: 59000,
+    listPrice: 89000,
+    image: "",
+    tagline: "주머니에 들어가는 노이즈 캔슬링",
+    features: ["최대 28시간 재생", "IPX4 생활방수", "저지연 게임 모드"],
+    rating: 4.5,
+    reviewCount: 942,
+  },
+  {
+    id: 11,
     name: "논슬립 요가매트",
+    category: "운동",
     price: 42000,
     listPrice: 58000,
     image: "",
@@ -73,6 +139,18 @@ export const PRODUCTS: Product[] = [
     features: ["두께 6mm", "TPE 소재", "전용 스트랩 포함"],
     rating: 4.9,
     reviewCount: 723,
+  },
+  {
+    id: 12,
+    name: "폼롤러 45cm",
+    category: "운동",
+    price: 21900,
+    listPrice: 29000,
+    image: "",
+    tagline: "운동 전후 5분 근막 이완",
+    features: ["EVA 고밀도", "하중 200kg", "휴대용 사이즈"],
+    rating: 4.2,
+    reviewCount: 1338,
   },
 ];
 

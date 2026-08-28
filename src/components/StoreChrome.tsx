@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { BRAND_NAME } from "@/data/products";
-import type { Variant } from "@/lib/types";
+import { CATEGORIES, type Category, type Variant } from "@/lib/types";
 import {
   IconBack,
   IconCart,
@@ -16,11 +17,10 @@ import {
 /* ────────────────────────────────────────────────────────────
    상점 크롬
 
-   실제 커머스처럼 보이되, 실제 판매로 오인되면 안 됩니다.
-   진짜처럼 만들수록 최상단 「샘플」 띠가 더 중요해집니다.
+   여기 있는 컨트롤은 전부 실제로 동작합니다.
+   눌러도 아무 일 없는 장식 버튼은 두지 않습니다 —
+   그러면 사이트가 아니라 사이트 그림이 됩니다.
    ──────────────────────────────────────────────────────────── */
-
-const CATEGORIES = ["전체", "주방", "의류", "수납", "뷰티", "디지털", "운동"];
 
 export function DemoStrip({ variant }: { variant: Variant }) {
   return (
@@ -49,12 +49,27 @@ export function StoreHeader({
   cartCount = 0,
   back,
   title,
+  search,
+  category,
 }: {
   variant: Variant;
   cartCount?: number;
   back?: { href: string; label: string };
   title?: string;
+  search?: {
+    open: boolean;
+    query: string;
+    onToggle: () => void;
+    onChange: (v: string) => void;
+  };
+  category?: { value: Category | "전체"; onChange: (c: Category | "전체") => void };
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (search?.open) inputRef.current?.focus();
+  }, [search?.open]);
+
   return (
     <>
       <DemoStrip variant={variant} />
@@ -73,53 +88,83 @@ export function StoreHeader({
             <button
               type="button"
               aria-label="메뉴"
+              onClick={() => category?.onChange("전체")}
               className="-ml-1.5 flex h-8 w-8 items-center justify-center text-ink"
             >
               <IconMenu />
             </button>
           )}
 
-          {title ? (
-            <h1 className="text-[15px] font-bold tracking-tight">{title}</h1>
+          {search?.open ? (
+            <div className="flex flex-1 items-center gap-2">
+              <input
+                ref={inputRef}
+                value={search.query}
+                onChange={(e) => search.onChange(e.target.value)}
+                placeholder="상품명으로 검색"
+                className="min-w-0 flex-1 rounded-lg border border-line bg-card px-3 py-1.5 text-[13px] outline-none focus:border-brand"
+              />
+              <button
+                type="button"
+                onClick={search.onToggle}
+                className="shrink-0 text-[12.5px] font-semibold text-muted"
+              >
+                취소
+              </button>
+            </div>
           ) : (
-            <Link href="/demo" className="text-[16px] font-extrabold tracking-tight">
-              {BRAND_NAME}
-            </Link>
-          )}
-
-          <div className="ml-auto flex items-center gap-0.5">
-            <button
-              type="button"
-              aria-label="검색"
-              className="flex h-8 w-8 items-center justify-center text-ink/75"
-            >
-              <IconSearch />
-            </button>
-            <Link
-              href="/demo/cart"
-              aria-label={`장바구니 ${cartCount}개`}
-              className="relative flex h-8 w-8 items-center justify-center text-ink/75"
-            >
-              <IconCart />
-              {cartCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-brand px-[3.5px] font-mono text-[9px] font-bold text-white">
-                  {cartCount}
-                </span>
+            <>
+              {title ? (
+                <h1 className="text-[15px] font-bold tracking-tight">{title}</h1>
+              ) : (
+                <Link
+                  href="/demo"
+                  className="text-[16px] font-extrabold tracking-tight"
+                >
+                  {BRAND_NAME}
+                </Link>
               )}
-            </Link>
-          </div>
+
+              <div className="ml-auto flex items-center gap-0.5">
+                {search && (
+                  <button
+                    type="button"
+                    aria-label="검색"
+                    onClick={search.onToggle}
+                    className="flex h-8 w-8 items-center justify-center text-ink/75"
+                  >
+                    <IconSearch />
+                  </button>
+                )}
+                <Link
+                  href="/demo/cart"
+                  aria-label={`장바구니 ${cartCount}개`}
+                  className="relative flex h-8 w-8 items-center justify-center text-ink/75"
+                >
+                  <IconCart />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-brand px-[3.5px] font-mono text-[9px] font-bold text-white">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            </>
+          )}
         </div>
 
-        {!back && (
+        {category && (
           <nav className="flex gap-4 overflow-x-auto border-t border-line/70 px-3.5 py-2">
-            {CATEGORIES.map((c, i) => (
+            {(["전체", ...CATEGORIES] as const).map((c) => (
               <button
                 key={c}
                 type="button"
-                className={`shrink-0 pb-[3px] text-[12.5px] whitespace-nowrap ${
-                  i === 0
+                onClick={() => category.onChange(c)}
+                aria-pressed={category.value === c}
+                className={`shrink-0 pb-[3px] text-[12.5px] whitespace-nowrap transition ${
+                  category.value === c
                     ? "border-b-[1.5px] border-ink font-bold text-ink"
-                    : "text-muted"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 {c}
@@ -132,14 +177,26 @@ export function StoreHeader({
   );
 }
 
-/** 하단 탭 — 목록 화면에만 답니다. 상세·장바구니는 구매 바가 대신합니다. */
-export function BottomTabs({ cartCount = 0 }: { cartCount?: number }) {
+/** 하단 탭 — 목록 화면에만. 상세·장바구니는 구매 바가 그 자리를 씁니다. */
+export function BottomTabs({
+  cartCount = 0,
+  onHome,
+  onCategory,
+  onSearch,
+  onMy,
+}: {
+  cartCount?: number;
+  onHome: () => void;
+  onCategory: () => void;
+  onSearch: () => void;
+  onMy: () => void;
+}) {
   const tabs = [
-    { icon: <IconHome />, label: "홈", active: true, href: "/demo" },
-    { icon: <IconGrid />, label: "카테고리" },
-    { icon: <IconSearch />, label: "검색" },
+    { icon: <IconHome />, label: "홈", onClick: onHome, active: true },
+    { icon: <IconGrid />, label: "카테고리", onClick: onCategory },
+    { icon: <IconSearch />, label: "검색", onClick: onSearch },
     { icon: <IconCart />, label: "장바구니", href: "/demo/cart", badge: cartCount },
-    { icon: <IconUser />, label: "마이" },
+    { icon: <IconUser />, label: "마이", onClick: onMy },
   ];
 
   return (
@@ -166,12 +223,53 @@ export function BottomTabs({ cartCount = 0 }: { cartCount?: number }) {
             {inner}
           </Link>
         ) : (
-          <button key={t.label} type="button" className={cls}>
+          <button key={t.label} type="button" onClick={t.onClick} className={cls}>
             {inner}
           </button>
         );
       })}
     </nav>
+  );
+}
+
+/** 하단 시트 — 카테고리 선택 · 마이 */
+export function Sheet({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <button
+        type="button"
+        aria-label="닫기"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/35"
+      />
+      <div className="relative mx-auto w-full max-w-[420px] rounded-t-2xl border-t border-line bg-paper pb-5">
+        <div className="flex items-center justify-between px-4 py-3.5">
+          <h2 className="text-[14.5px] font-bold">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[12.5px] font-semibold text-muted"
+          >
+            닫기
+          </button>
+        </div>
+        <div className="px-4">{children}</div>
+      </div>
+    </div>
   );
 }
 

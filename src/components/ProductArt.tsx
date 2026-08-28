@@ -1,12 +1,12 @@
 import Image from "next/image";
-import type { Product } from "@/lib/types";
+import type { Category, Product } from "@/lib/types";
 
 /* ────────────────────────────────────────────────────────────
    상품 일러스트
 
-   실제 상품 사진이 없으므로 벡터로 그립니다.
-   회색 자리표시자는 "미완성"으로 보이지만, 물건 모양이 보이면
-   의도된 디자인으로 읽힙니다.
+   실제 사진이 없으므로 벡터로 그립니다.
+   모양은 카테고리로, 색은 상품 id로 정합니다 —
+   같은 카테고리라도 다른 상품임이 보입니다.
 
    product.image 를 채우면 사진이 그대로 우선합니다.
    ──────────────────────────────────────────────────────────── */
@@ -19,13 +19,15 @@ const PALETTES: Palette[] = [
   { bg: ["#E8E9DE", "#C9CDB6"], body: "#8A6A44", dark: "#654C2F", accent: "#E5D4B8" },
   { bg: ["#EBE4ED", "#CCC0D4"], body: "#6E5F7B", dark: "#4E4159", accent: "#DCCFE4" },
   { bg: ["#E3E9EA", "#C1CFD2"], body: "#39505A", dark: "#26383F", accent: "#8FC7D4" },
-  { bg: ["#F1E8D3", "#DDCCA0", ], body: "#5E7A5A", dark: "#41573E", accent: "#CFE0C4" },
+  { bg: ["#F1E8D3", "#DDCCA0"], body: "#5E7A5A", dark: "#41573E", accent: "#CFE0C4" },
+  { bg: ["#EDE6DC", "#D3C3AC"], body: "#6B5B4A", dark: "#4A3E32", accent: "#DDD0BE" },
+  { bg: ["#E6EAF0", "#C4CEDD"], body: "#46566E", dark: "#2F3B4D", accent: "#B8C7DE" },
 ];
 
-function Art({ id, p }: { id: number; p: Palette }) {
-  switch (id) {
-    /* 1 · 텀블러 */
-    case 1:
+function Shape({ c, p }: { c: Category; p: Palette }) {
+  switch (c) {
+    /* 주방 — 텀블러 */
+    case "주방":
       return (
         <>
           <rect x="36" y="15" width="28" height="10" rx="3.4" fill={p.dark} />
@@ -39,8 +41,8 @@ function Art({ id, p }: { id: number; p: Palette }) {
         </>
       );
 
-    /* 2 · 오버셔츠 */
-    case 2:
+    /* 의류 — 셔츠 */
+    case "의류":
       return (
         <>
           <path
@@ -56,13 +58,29 @@ function Art({ id, p }: { id: number; p: Palette }) {
         </>
       );
 
-    /* 3 · 데스크 정리함 */
-    case 3:
+    /* 수납 — 정리함 */
+    case "수납":
       return (
         <>
-          <rect x="38" y="24" width="4" height="22" rx="2" fill={p.dark} transform="rotate(-9 40 35)" />
+          <rect
+            x="38"
+            y="24"
+            width="4"
+            height="22"
+            rx="2"
+            fill={p.dark}
+            transform="rotate(-9 40 35)"
+          />
           <rect x="45" y="20" width="4" height="26" rx="2" fill={p.accent} />
-          <rect x="52" y="26" width="4" height="20" rx="2" fill={p.dark} transform="rotate(7 54 36)" />
+          <rect
+            x="52"
+            y="26"
+            width="4"
+            height="20"
+            rx="2"
+            fill={p.dark}
+            transform="rotate(7 54 36)"
+          />
           <rect x="20" y="44" width="60" height="34" rx="4" fill={p.body} />
           <rect x="20" y="44" width="60" height="7" fill={p.dark} opacity=".35" />
           <path d="M40 51v27M60 51v27" stroke={p.dark} strokeWidth="1.8" />
@@ -70,8 +88,8 @@ function Art({ id, p }: { id: number; p: Palette }) {
         </>
       );
 
-    /* 4 · 앰플 */
-    case 4:
+    /* 뷰티 — 앰플 */
+    case "뷰티":
       return (
         <>
           <rect x="42" y="14" width="16" height="17" rx="3.2" fill={p.dark} />
@@ -83,8 +101,8 @@ function Art({ id, p }: { id: number; p: Palette }) {
         </>
       );
 
-    /* 5 · 무선 충전기 */
-    case 5:
+    /* 디지털 — 충전기 + 기기 */
+    case "디지털":
       return (
         <>
           <rect x="37" y="16" width="26" height="46" rx="4.4" fill={p.dark} />
@@ -96,7 +114,7 @@ function Art({ id, p }: { id: number; p: Palette }) {
         </>
       );
 
-    /* 6 · 요가매트 */
+    /* 운동 — 말린 매트 */
     default:
       return (
         <>
@@ -120,10 +138,13 @@ function Art({ id, p }: { id: number; p: Palette }) {
 export function ProductArt({
   product,
   size,
+  view = 0,
   className = "",
 }: {
   product: Product;
   size: number;
+  /** 상세 갤러리용 — 0 정면, 1 확대, 2 밝은 배경 */
+  view?: number;
   className?: string;
 }) {
   if (product.image) {
@@ -139,7 +160,9 @@ export function ProductArt({
   }
 
   const p = PALETTES[(product.id - 1) % PALETTES.length];
-  const gid = `g${product.id}`;
+  const gid = `pa${product.id}-${view}`;
+  const scale = view === 1 ? 1.42 : 1;
+  const bg: [string, string] = view === 2 ? ["#FBF8F3", "#EFE7DA"] : p.bg;
 
   return (
     <svg
@@ -150,13 +173,15 @@ export function ProductArt({
     >
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={p.bg[0]} />
-          <stop offset="100%" stopColor={p.bg[1]} />
+          <stop offset="0%" stopColor={bg[0]} />
+          <stop offset="100%" stopColor={bg[1]} />
         </linearGradient>
       </defs>
       <rect width="100" height="100" fill={`url(#${gid})`} />
-      <ellipse cx="50" cy="86" rx="26" ry="4" fill="#000" opacity=".07" />
-      <Art id={product.id} p={p} />
+      <g transform={`translate(50 52) scale(${scale}) translate(-50 -52)`}>
+        <ellipse cx="50" cy="86" rx="26" ry="4" fill="#000" opacity=".07" />
+        <Shape c={product.category} p={p} />
+      </g>
     </svg>
   );
 }

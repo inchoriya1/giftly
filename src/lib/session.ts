@@ -61,6 +61,26 @@ export function clearCart() {
   sessionStorage.removeItem(K_CART);
 }
 
+/* ── 찜 ── */
+
+const K_WISH = "smp_wish";
+
+export function readWish(): number[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(K_WISH) ?? "[]");
+    return Array.isArray(v) ? (v as number[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function toggleWish(id: number): number[] {
+  const cur = readWish();
+  const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+  localStorage.setItem(K_WISH, JSON.stringify(next));
+  return next;
+}
+
 /** 주문번호 — 실제 주문이 아니므로 화면 표시용으로만 씁니다. */
 export function makeOrderNo(): string {
   const d = new Date();

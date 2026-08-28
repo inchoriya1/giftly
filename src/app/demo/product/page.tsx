@@ -4,12 +4,12 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { findProduct, PRODUCTS } from "@/data/products";
 import { track } from "@/lib/analytics";
-import { addToCart, ensureSession, readCart } from "@/lib/session";
+import { addToCart, ensureSession, readCart, readWish, toggleWish } from "@/lib/session";
 import type { Variant } from "@/lib/types";
 import { ProductArt } from "@/components/ProductArt";
 import { priceText } from "@/components/ui";
 import { StoreHeader } from "@/components/StoreChrome";
-import { IconMinus, IconPlus, IconStar } from "@/components/icons";
+import { IconHeart, IconMinus, IconPlus, IconStar } from "@/components/icons";
 
 export default function ProductPage() {
   return (
@@ -22,12 +22,15 @@ export default function ProductPage() {
 function ProductDetail() {
   const router = useRouter();
   const params = useSearchParams();
-  const product = findProduct(Number(params.get("id") ?? 1));
+  const id = Number(params.get("id") ?? 1);
+  const product = findProduct(id);
 
   const [variant, setVariant] = useState<Variant | null>(null);
   const [qty, setQty] = useState(1);
   const [cartCount, setCartCount] = useState(0);
   const [tab, setTab] = useState<"info" | "review" | "ship">("info");
+  const [view, setView] = useState(0);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const { variant: v } = ensureSession();
@@ -35,9 +38,10 @@ function ProductDetail() {
     /* eslint-disable react-hooks/set-state-in-effect -- 클라이언트 전용 값 */
     setVariant(v);
     setCartCount(cart?.qty ?? 0);
+    setLiked(readWish().includes(id));
     /* eslint-enable react-hooks/set-state-in-effect */
     track("page_view", { page_path: "/demo/product" });
-  }, []);
+  }, [id]);
 
   if (!variant) return <div className="min-h-dvh" />;
 
@@ -60,14 +64,18 @@ function ProductDetail() {
         back={{ href: "/demo", label: "목록으로" }}
       />
 
-      {/* 이미지 */}
-      <ProductArt product={product} size={420} />
-      <div className="flex justify-center gap-1.5 py-2.5">
-        {[0, 1, 2, 3].map((i) => (
-          <span
+      {/* 이미지 갤러리 — 인디케이터가 실제로 뷰를 바꿉니다 */}
+      <ProductArt product={product} size={420} view={view} />
+      <div className="flex justify-center gap-2 py-2.5">
+        {[0, 1, 2].map((i) => (
+          <button
             key={i}
-            className={`h-[5px] rounded-full transition-all ${
-              i === 0 ? "w-3.5 bg-ink" : "w-[5px] bg-line"
+            type="button"
+            onClick={() => setView(i)}
+            aria-label={`이미지 ${i + 1}번`}
+            aria-pressed={view === i}
+            className={`h-[6px] rounded-full transition-all ${
+              i === view ? "w-4 bg-ink" : "w-[6px] bg-line"
             }`}
           />
         ))}
@@ -259,6 +267,17 @@ function ProductDetail() {
 
       {/* 하단 고정 구매 바 */}
       <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[420px] items-center gap-2.5 border-t border-line bg-paper/95 px-4 py-2.5 backdrop-blur">
+        <button
+          type="button"
+          onClick={() => setLiked(toggleWish(product.id).includes(product.id))}
+          aria-label={liked ? "찜 해제" : "찜하기"}
+          aria-pressed={liked}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line ${
+            liked ? "text-brand" : "text-muted"
+          }`}
+        >
+          <IconHeart size={20} />
+        </button>
         <div className="flex-1">
           <p className="text-[10.5px] text-muted">총 {qty}개</p>
           <p className="font-mono text-[15px] font-bold">{priceText(total)}</p>
