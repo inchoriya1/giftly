@@ -3,9 +3,9 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GIFTLY — 90초 기프트 큐레이터",
+  title: "마케팅 성과 대시보드",
   description:
-    "받는 분과의 관계, 예산, 취향만 알려주시면 딱 맞는 선물 3가지를 골라드립니다.",
+    "채널·소재·타겟·랜딩 성과를 한 화면에서 보고, 다음에 무엇을 할지까지 제안합니다.",
 };
 
 export const viewport: Viewport = {
@@ -44,7 +44,7 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        <div className="app-frame">{children}</div>
+        {children}
       </body>
     </html>
   );

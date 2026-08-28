@@ -26,7 +26,7 @@ export default function Result() {
   useEffect(() => {
     const a = loadAnswers();
     if (!a) {
-      router.replace("/");
+      router.replace("/demo");
       return;
     }
 
@@ -188,7 +188,7 @@ export default function Result() {
       )}
 
       <Link
-        href="/"
+        href="/demo"
         onClick={resetFlow}
         className="pb-2 text-center text-[13.5px] font-semibold text-muted"
       >

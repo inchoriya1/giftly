@@ -22,7 +22,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 모바일 온리 — 데스크톱에서는 가운데 정렬된 좁은 컬럼으로 보여준다 */
+/* 광고 랜딩(=측정 대상)은 모바일 온리. 대시보드는 이 프레임을 쓰지 않는다. */
 .app-frame {
   width: 100%;
   max-width: 420px;
@@ -32,11 +32,9 @@ body {
 }
 
 @media (min-width: 520px) {
-  body {
-    background: #2a2622;
-  }
   .app-frame {
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    border-left: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
   }
 }
 
