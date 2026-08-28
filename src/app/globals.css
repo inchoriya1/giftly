@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* 상점(/demo) — 따뜻한 커머스 톤 */
   --color-paper: #fbf8f3;
   --color-card: #ffffff;
   --color-ink: #1b1714;
@@ -8,6 +9,23 @@
   --color-line: #e8dfd4;
   --color-brand: #8e2a20;
   --color-brand-soft: #f6eae6;
+
+  /* 대시보드 — 차가운 중성 도구 톤.
+     분석 도구는 데이터에 색을 쓰고 크롬은 물러납니다. */
+  --color-app: #f6f7f8;
+  --color-panel: #ffffff;
+  --color-rail: #14181c;
+  --color-rail-ink: #a8b0b8;
+  --color-rail-on: #ffffff;
+  --color-edge: #e3e6e9;
+  --color-edge-2: #eef0f2;
+  --color-txt: #14181c;
+  --color-txt-2: #5b6570;
+  --color-txt-3: #8b949e;
+  --color-acc: #1c5cab;
+  --color-acc-soft: #eaf1fa;
+  --color-pos: #096b25;
+  --color-neg: #b3261e;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
     "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif;

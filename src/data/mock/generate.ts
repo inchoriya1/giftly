@@ -359,6 +359,153 @@ function buildIndustry(id: IndustryId): Industry {
   };
 }
 
+/* ────────────────────────────────────────────────────────────
+   기간 슬라이스
+
+   상단 기간 선택기가 실제로 다시 계산합니다. 눌러도 안 바뀌는
+   컨트롤이 화면에서 가장 가짜처럼 보입니다.
+
+   기간을 좁히면 표본이 줄어 A/B 유의성이 사라지는 것까지
+   그대로 재현됩니다 — 실무에서 매일 겪는 일입니다.
+
+   주의: 세그먼트·소재는 일자별 원천이 없어 비율을 유지한 채
+   물량만 기간에 비례해 조정합니다. 전환율 같은 비율 지표는
+   기간이 짧아져도 크게 흔들리지 않는다는 가정입니다.
+   ──────────────────────────────────────────────────────────── */
+
+export const RANGES = [7, 14, 28] as const;
+export type RangeDays = (typeof RANGES)[number];
+
+export function sliceIndustry(full: Industry, days: RangeDays): Industry {
+  if (days >= DAYS) return full;
+
+  const allDates = [...new Set(full.daily.map((d) => d.date))];
+  const keep = allDates.slice(-days);
+  const daily = full.daily.filter((d) => keep.includes(d.date));
+
+  const sumOf = (rows: DailyRow[], k: keyof DailyRow) =>
+    rows.reduce((a, r) => a + (r[k] as number), 0);
+
+  const channels: ChannelStat[] = CHANNELS.map((ch) => {
+    const rows = daily.filter((r) => r.channel === ch);
+    const impressions = sumOf(rows, "impressions");
+    const clicks = sumOf(rows, "clicks");
+    const conversions = sumOf(rows, "conversions");
+    const cost = sumOf(rows, "cost");
+    const revenue = sumOf(rows, "revenue");
+    return {
+      id: ch,
+      name: CHANNEL_NAMES[ch],
+      impressions,
+      clicks,
+      conversions,
+      cost,
+      revenue,
+      ctr: impressions ? (clicks / impressions) * 100 : 0,
+      cvr: clicks ? (conversions / clicks) * 100 : 0,
+      cpc: clicks ? cost / clicks : 0,
+      cpa: conversions ? cost / conversions : 0,
+      roas: cost ? (revenue / cost) * 100 : 0,
+      share: 0,
+    };
+  });
+
+  const totalCost = channels.reduce((a, c) => a + c.cost, 0);
+  channels.forEach((c) => (c.share = totalCost ? (c.cost / totalCost) * 100 : 0));
+
+  const totalClicks = channels.reduce((a, c) => a + c.clicks, 0);
+  const totalConv = channels.reduce((a, c) => a + c.conversions, 0);
+  const impressions = channels.reduce((a, c) => a + c.impressions, 0);
+  const revenue = channels.reduce((a, c) => a + c.revenue, 0);
+
+  // 물량 비례 축소 (비율은 유지)
+  const scale = full.totals.clicks ? totalClicks / full.totals.clicks : 1;
+  const segments: Segment[] = full.segments.map((s) => ({
+    ...s,
+    clicks: Math.round(s.clicks * scale),
+    conversions: Math.round(s.conversions * scale),
+    cost: Math.round(s.cost * scale),
+  }));
+  const creatives: Creative[] = full.creatives.map((c) => ({
+    ...c,
+    clicks: Math.round(c.clicks * scale),
+    conversions: Math.round(c.conversions * scale),
+  }));
+
+  const funnel: FunnelStage[] = full.funnel.map((f, i) => ({
+    ...f,
+    value:
+      i === 0
+        ? totalClicks
+        : i === full.funnel.length - 1
+          ? totalConv
+          : Math.round(f.value * scale),
+  }));
+
+  // A/B — 비율은 유지하고 세션만 줄입니다. 표본이 줄면 p값이 커집니다.
+  const sessionsA = Math.round(totalClicks * 0.5);
+  const sessionsB = totalClicks - sessionsA;
+  const convA = Math.round((sessionsA * full.ab.a.rate) / 100);
+  const convB = Math.round((sessionsB * full.ab.b.rate) / 100);
+  const pValue = chiSquareP(convA, sessionsA - convA, convB, sessionsB - convB);
+
+  // 직전 동일 기간 대비
+  const prevRows = full.daily.filter((d) =>
+    allDates.slice(-days * 2, -days).includes(d.date),
+  );
+  const cur = (k: keyof DailyRow) => sumOf(daily, k);
+  const prv = (k: keyof DailyRow) => sumOf(prevRows, k);
+  const safe = (a: number, b: number) => (b ? (a / b - 1) * 100 : 0);
+
+  return {
+    ...full,
+    daily,
+    channels,
+    segments,
+    creatives,
+    funnel,
+    ab: {
+      a: {
+        ...full.ab.a,
+        sessions: sessionsA,
+        conversions: convA,
+        rate: sessionsA ? (convA / sessionsA) * 100 : 0,
+      },
+      b: {
+        ...full.ab.b,
+        sessions: sessionsB,
+        conversions: convB,
+        rate: sessionsB ? (convB / sessionsB) * 100 : 0,
+      },
+      pValue,
+      significant: pValue < 0.05,
+    },
+    totals: {
+      impressions,
+      clicks: totalClicks,
+      conversions: totalConv,
+      cost: totalCost,
+      revenue,
+      ctr: impressions ? (totalClicks / impressions) * 100 : 0,
+      cvr: totalClicks ? (totalConv / totalClicks) * 100 : 0,
+      cpa: totalConv ? totalCost / totalConv : 0,
+      roas: totalCost ? (revenue / totalCost) * 100 : 0,
+    },
+    deltas: {
+      clicks: safe(cur("clicks"), prv("clicks")),
+      conversions: safe(cur("conversions"), prv("conversions")),
+      cpa: safe(
+        cur("cost") / (cur("conversions") || 1),
+        prv("cost") / (prv("conversions") || 1),
+      ),
+      roas: safe(
+        cur("revenue") / (cur("cost") || 1),
+        prv("revenue") / (prv("cost") || 1),
+      ),
+    },
+  };
+}
+
 /** 2×2 카이제곱 → p값 근사. 측정 설계서의 판정 규칙과 같은 방식입니다. */
 export function chiSquareP(a: number, b: number, c: number, d: number): number {
   const n = a + b + c + d;

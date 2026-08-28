@@ -38,17 +38,33 @@ export function readSession(): {
   };
 }
 
-/* ── 장바구니 (샘플이므로 상품 id 하나만 담습니다) ── */
+/* ── 장바구니 (샘플이라 한 상품만 담습니다) ── */
 
-export function addToCart(productId: number) {
-  sessionStorage.setItem(K_CART, String(productId));
+export type CartItem = { id: number; qty: number };
+
+export function addToCart(id: number, qty = 1) {
+  sessionStorage.setItem(K_CART, JSON.stringify({ id, qty }));
 }
 
-export function readCart(): number | null {
-  const v = sessionStorage.getItem(K_CART);
-  return v ? Number(v) : null;
+export function readCart(): CartItem | null {
+  const raw = sessionStorage.getItem(K_CART);
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw) as CartItem;
+    return v && typeof v.id === "number" ? v : null;
+  } catch {
+    return null;
+  }
 }
 
 export function clearCart() {
   sessionStorage.removeItem(K_CART);
+}
+
+/** 주문번호 — 실제 주문이 아니므로 화면 표시용으로만 씁니다. */
+export function makeOrderNo(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  const rand = Math.floor(Math.random() * 9000) + 1000;
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${rand}`;
 }
