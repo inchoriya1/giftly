@@ -3,7 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "마케팅 성과 대시보드",
+  title: "AdCompass — 마케팅 성과 대시보드",
   description:
     "채널·소재·타겟·랜딩 성과를 한 화면에서 보고, 다음에 무엇을 할지까지 제안합니다.",
 };

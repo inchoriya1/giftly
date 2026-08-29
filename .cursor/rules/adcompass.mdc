@@ -1,9 +1,9 @@
 ---
-description: 마케팅 성과 대시보드 — 프로젝트 공통 규칙
+description: AdCompass — 프로젝트 공통 규칙
 alwaysApply: true
 ---
 
-# 마케팅 성과 대시보드
+# AdCompass — 마케팅 성과 대시보드
 
 광고 성과를 읽고 **다음에 무엇을 할지 제안하는** 대시보드.
 `/demo`는 대시보드가 읽는 이벤트를 발생시키는 **측정 대상 샘플 랜딩**이다.

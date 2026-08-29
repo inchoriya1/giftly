@@ -1,4 +1,4 @@
-# 마케팅 성과 대시보드
+# AdCompass — 마케팅 성과 대시보드
 
 광고 성과를 읽고 **「다음에 무엇을 할지」까지 제안하는** 대시보드.
 
@@ -191,7 +191,7 @@ src/
     korean.ts             조사 처리 (로/으로, 을/를)
     session.ts            A/B 배정 · 장바구니
 supabase/schema.sql
-.cursor/rules/giftly.mdc  프로젝트 컨벤션
+.cursor/rules/adcompass.mdc  프로젝트 컨벤션
 ```
 
 ---

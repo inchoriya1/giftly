@@ -34,7 +34,7 @@ export function AppShell({
     <div className="min-h-dvh bg-paper text-ink">
       <nav className="sticky top-0 z-30 flex items-center gap-4 border-b border-line bg-panel/90 px-4 py-2.5 backdrop-blur-md">
         <Link href="/" className="text-[16px] font-extrabold text-brand">
-          Giftly
+          AdCompass
         </Link>
         <div className="hidden items-center gap-3 md:flex">
           {SECTIONS.map((s) => {
