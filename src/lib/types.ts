@@ -14,6 +14,8 @@ export const CATEGORIES: Category[] = [
 export type Product = {
   id: number;
   name: string;
+  /** 셀렉트숍 카드의 브랜드 라인. 카테고리와 별개로 둡니다. */
+  brand: string;
   category: Category;
   price: number;
   /** 원가 — 할인 표기용 (B안에서만 노출) */

@@ -7,8 +7,9 @@ import { track } from "@/lib/analytics";
 import { addToCart, ensureSession, readCart, readWish, toggleWish } from "@/lib/session";
 import type { Variant } from "@/lib/types";
 import { ProductArt } from "@/components/ProductArt";
+import { ProductCard } from "@/components/ProductCard";
 import { priceText } from "@/components/ui";
-import { StoreHeader } from "@/components/StoreChrome";
+import { StoreFooter, StoreHeader } from "@/components/StoreChrome";
 import { IconHeart, IconMinus, IconPlus, IconStar } from "@/components/icons";
 
 export default function ProductPage() {
@@ -48,7 +49,12 @@ function ProductDetail() {
   const isB = variant === "B";
   const off = Math.round((1 - product.price / product.listPrice) * 100);
   const total = product.price * qty;
-  const related = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
+  const related = PRODUCTS.filter(
+    (p) => p.category === product.category && p.id !== product.id,
+  ).concat(PRODUCTS.filter((p) => p.id !== product.id));
+  const relatedUnique = related.filter(
+    (p, i, arr) => arr.findIndex((x) => x.id === p.id) === i,
+  ).slice(0, 4);
 
   function add() {
     addToCart(product.id, qty);
@@ -56,132 +62,148 @@ function ProductDetail() {
     router.push("/demo/cart");
   }
 
+  const buyPanel = (
+    <>
+      <p className="text-[12px] text-muted">{product.brand}</p>
+      <h1 className="mt-1 text-[22px] leading-snug font-bold tracking-tight">
+        {product.name}
+      </h1>
+      <p className="mt-1 text-[13px] text-muted">{product.tagline}</p>
+
+      <div className="mt-3 flex items-center gap-1.5 text-[12px]">
+        <span className="flex items-center gap-0.5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <IconStar
+              key={i}
+              size={12}
+              className={i < Math.round(product.rating) ? "text-ink" : "text-line"}
+            />
+          ))}
+        </span>
+        <span className="font-semibold">{product.rating}</span>
+        <span className="text-muted">
+          후기 {product.reviewCount.toLocaleString("ko-KR")}
+        </span>
+      </div>
+
+      {isB ? (
+        <div className="mt-5">
+          <p className="text-[13px] text-muted line-through tabular-nums">
+            {priceText(product.listPrice)}
+          </p>
+          <p className="mt-0.5 text-[26px] font-extrabold tabular-nums">
+            <span className="mr-2 text-sale">{off}%</span>
+            {priceText(product.price)}
+          </p>
+          <p className="mt-2 text-[13px] font-semibold text-sale">
+            오늘 주문 시 내일 도착 · 무료배송
+          </p>
+        </div>
+      ) : (
+        <div className="mt-5">
+          <p className="text-[26px] font-extrabold tabular-nums">
+            {priceText(product.price)}
+          </p>
+          <p className="mt-2 text-[13px] text-muted">
+            3만원 이상 무료배송 · 평균 2~3일 소요
+          </p>
+        </div>
+      )}
+
+      <div className="mt-6 flex items-center justify-between rounded-xl border border-line bg-card px-4 py-3">
+        <span className="text-[13px]">수량</span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            aria-label="수량 줄이기"
+            className="flex h-7 w-7 items-center justify-center border border-line disabled:opacity-40"
+            disabled={qty <= 1}
+          >
+            <IconMinus />
+          </button>
+          <span className="w-5 text-center text-[14px] tabular-nums">{qty}</span>
+          <button
+            type="button"
+            onClick={() => setQty((q) => Math.min(9, q + 1))}
+            aria-label="수량 늘리기"
+            className="flex h-7 w-7 items-center justify-center border border-line"
+          >
+            <IconPlus />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 hidden items-center gap-2 md:flex">
+        <button
+          type="button"
+          onClick={() => setLiked(toggleWish(product.id).includes(product.id))}
+          aria-label={liked ? "찜 해제" : "찜하기"}
+          className={`flex h-12 w-12 items-center justify-center border border-line ${
+            liked ? "text-ink" : "text-muted"
+          }`}
+        >
+          <IconHeart size={20} filled={liked} />
+        </button>
+        <button
+          type="button"
+          onClick={add}
+          className="h-12 flex-1 rounded-xl bg-brand text-[14px] font-extrabold text-brand-ink"
+        >
+          장바구니 담기
+        </button>
+      </div>
+    </>
+  );
+
   return (
-    <main className="fade-up flex min-h-dvh flex-col bg-paper pb-[68px]">
+    <main className="flex min-h-dvh flex-col bg-paper pb-[72px] md:pb-0">
       <StoreHeader
         variant={variant}
         cartCount={cartCount}
         back={{ href: "/demo", label: "목록으로" }}
       />
 
-      {/* 이미지 갤러리 — 인디케이터가 실제로 뷰를 바꿉니다 */}
-      <ProductArt product={product} size={420} view={view} />
-      <div className="flex justify-center gap-2 py-2.5">
-        {[0, 1, 2].map((i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => setView(i)}
-            aria-label={`이미지 ${i + 1}번`}
-            aria-pressed={view === i}
-            className={`h-[6px] rounded-full transition-all ${
-              i === view ? "w-4 bg-ink" : "w-[6px] bg-line"
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* 상품 정보 */}
-      <div className="flex flex-col gap-2.5 border-b border-line px-4 pb-5">
+      <div className="store-wrap grid gap-10 py-6 md:grid-cols-2 md:py-12">
         <div>
-          {isB && (
-            <span className="mb-1.5 inline-block rounded bg-brand-soft px-1.5 py-[2px] text-[10.5px] font-bold text-brand">
-              오늘 자정 마감
-            </span>
-          )}
-          <h1 className="text-[19px] leading-snug font-bold tracking-tight">
-            {product.name}
-          </h1>
-          <p className="mt-1 text-[13px] text-muted">{product.tagline}</p>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-[12px]">
-          <span className="flex items-center gap-0.5 text-[#e0a01a]">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <IconStar
+          <div className="overflow-hidden rounded-xl border border-line bg-studio">
+            <ProductArt product={product} size={560} view={view} />
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {[0, 1, 2].map((i) => (
+              <button
                 key={i}
-                size={12}
-                className={i < Math.round(product.rating) ? "" : "text-line"}
-              />
+                type="button"
+                onClick={() => setView(i)}
+                aria-label={`이미지 ${i + 1}번`}
+                aria-pressed={view === i}
+                className={`overflow-hidden rounded-xl bg-studio ${
+                  view === i ? "outline-2 outline-offset-2 outline-brand" : "border border-line"
+                }`}
+              >
+                <ProductArt product={product} size={120} view={i} />
+              </button>
             ))}
-          </span>
-          <span className="font-semibold text-ink">{product.rating}</span>
-          <span className="text-muted">
-            후기 {product.reviewCount.toLocaleString("ko-KR")}건
-          </span>
-        </div>
-
-        {isB ? (
-          <div>
-            <p className="font-mono text-[12.5px] text-muted line-through">
-              {priceText(product.listPrice)}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-[22px] font-extrabold text-brand">
-                {off}%
-              </span>
-              <span className="font-mono text-[22px] font-extrabold">
-                {priceText(product.price)}
-              </span>
-            </div>
-            <p className="mt-1.5 text-[12px] font-semibold text-brand">
-              오늘 주문 시 내일 도착 · 무료배송
-            </p>
-          </div>
-        ) : (
-          <div>
-            <p className="font-mono text-[21px] font-bold">{priceText(product.price)}</p>
-            <p className="mt-1 text-[12px] text-muted">
-              3만원 이상 무료배송 · 평균 2~3일 소요
-            </p>
-          </div>
-        )}
-
-        {/* 수량 */}
-        <div className="mt-1 flex items-center justify-between rounded-lg border border-line bg-card px-3 py-2.5">
-          <span className="text-[13px] font-semibold">수량</span>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
-              aria-label="수량 줄이기"
-              className="flex h-7 w-7 items-center justify-center rounded border border-line disabled:opacity-40"
-              disabled={qty <= 1}
-            >
-              <IconMinus />
-            </button>
-            <span className="w-5 text-center font-mono text-[14px] font-semibold tabular-nums">
-              {qty}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQty((q) => Math.min(9, q + 1))}
-              aria-label="수량 늘리기"
-              className="flex h-7 w-7 items-center justify-center rounded border border-line"
-            >
-              <IconPlus />
-            </button>
           </div>
         </div>
+
+        <div className="md:sticky md:top-[88px] md:self-start">{buyPanel}</div>
       </div>
 
-      {/* 탭 */}
-      <div className="flex border-b border-line">
+      <div className="store-wrap flex flex-wrap gap-2 py-4">
         {(
           [
             ["info", "상품정보"],
             ["review", `후기 ${product.reviewCount.toLocaleString("ko-KR")}`],
-            ["ship", "배송·교환"],
+            ["ship", "배송/교환"],
           ] as const
         ).map(([k, label]) => (
           <button
             key={k}
             type="button"
             onClick={() => setTab(k)}
-            className={`flex-1 py-2.5 text-[12.5px] ${
-              tab === k
-                ? "border-b-2 border-ink font-bold text-ink"
-                : "text-muted"
+            className={`rounded-full px-4 py-1.5 text-[13px] font-bold ${
+              tab === k ? "bg-brand text-brand-ink" : "border border-line bg-card text-ink"
             }`}
           >
             {label}
@@ -189,106 +211,89 @@ function ProductDetail() {
         ))}
       </div>
 
-      <div className="px-4 py-4">
+      <div className="store-wrap max-w-[720px] py-8">
         {tab === "info" && (
-          <dl className="flex flex-col gap-2">
-            {product.features.map((f) => (
-              <div key={f} className="flex gap-2.5 text-[13px]">
-                <dt className="w-[52px] shrink-0 text-muted">특징</dt>
-                <dd>{f}</dd>
-              </div>
-            ))}
-            <div className="flex gap-2.5 text-[13px]">
-              <dt className="w-[52px] shrink-0 text-muted">제조국</dt>
-              <dd>대한민국</dd>
-            </div>
-            <div className="flex gap-2.5 text-[13px]">
-              <dt className="w-[52px] shrink-0 text-muted">A/S</dt>
-              <dd>고객센터 1234-5678</dd>
-            </div>
-          </dl>
+          <table className="w-full text-[13px]">
+            <tbody>
+              {product.features.map((f) => (
+                <tr key={f} className="border-b border-line">
+                  <th className="w-28 py-3 text-left font-normal text-muted">특징</th>
+                  <td className="py-3">{f}</td>
+                </tr>
+              ))}
+              <tr className="border-b border-line">
+                <th className="py-3 text-left font-normal text-muted">제조국</th>
+                <td className="py-3">대한민국</td>
+              </tr>
+              <tr className="border-b border-line">
+                <th className="py-3 text-left font-normal text-muted">A/S</th>
+                <td className="py-3">고객센터 0000-0000 (가상)</td>
+              </tr>
+            </tbody>
+          </table>
         )}
 
         {tab === "review" && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3 rounded-lg border border-line bg-card p-3">
-              <span className="font-mono text-[24px] font-bold">{product.rating}</span>
-              <div className="flex-1">
-                <p className="text-[12px] text-muted">
-                  후기 {product.reviewCount.toLocaleString("ko-KR")}건
-                </p>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-line">
-                  <div
-                    className="h-full rounded-full bg-brand"
-                    style={{ width: `${(product.rating / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-            <p className="text-[12px] leading-relaxed text-muted">
-              후기 내용은 표시하지 않습니다. 가상 상점이라 실제 구매자가 없습니다.
+          <div>
+            <p className="text-[32px] font-extrabold tabular-nums">{product.rating}</p>
+            <p className="mt-1 text-[13px] text-muted">
+              후기 {product.reviewCount.toLocaleString("ko-KR")}건
+            </p>
+            <p className="mt-6 text-[13px] leading-relaxed text-muted">
+              후기 본문은 표시하지 않습니다. 가상 상점이라 실제 구매자가 없습니다.
             </p>
           </div>
         )}
 
         {tab === "ship" && (
-          <ul className="flex flex-col gap-1.5 text-[13px] leading-relaxed">
-            <li>· 3만원 이상 무료배송 (미만 시 3,000원)</li>
-            <li>· 평균 2~3일 소요, 도서·산간 추가 1~2일</li>
-            <li>· 수령 후 7일 이내 교환·반품 가능</li>
-            <li className="text-muted">· 실제 배송이 발생하지 않습니다</li>
+          <ul className="flex flex-col gap-2 text-[13px] leading-relaxed">
+            <li>3만원 이상 무료배송 (미만 시 3,000원)</li>
+            <li>평균 2~3일 소요, 도서·산간 추가 1~2일</li>
+            <li>수령 후 7일 이내 교환·반품 가능</li>
+            <li className="text-muted">실제 배송이 발생하지 않습니다</li>
           </ul>
         )}
       </div>
 
-      {/* 함께 본 상품 */}
-      <div className="border-t border-line px-4 py-5">
-        <h2 className="mb-3 text-[13.5px] font-bold">함께 본 상품</h2>
-        <div className="grid grid-cols-3 gap-2.5">
-          {related.map((p) => (
-            <button
+      <div className="store-wrap border-t border-line py-12">
+        <h2 className="mb-6 text-[16px] font-bold">함께 본 상품</h2>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4">
+          {relatedUnique.map((p) => (
+            <ProductCard
               key={p.id}
-              type="button"
-              onClick={() => {
+              product={p}
+              variant={variant}
+              onOpen={() => {
                 track("view_product", { product_id: p.id, position: 0 });
                 router.push(`/demo/product?id=${p.id}`);
               }}
-              className="text-left"
-            >
-              <ProductArt product={p} size={110} className="rounded-lg" />
-              <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-snug">{p.name}</p>
-              <p className="mt-0.5 font-mono text-[11.5px] font-semibold">
-                {priceText(p.price)}
-              </p>
-            </button>
+            />
           ))}
         </div>
       </div>
 
-      {/* 하단 고정 구매 바 */}
-      <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[420px] items-center gap-2.5 border-t border-line bg-paper/95 px-4 py-2.5 backdrop-blur">
-        <button
-          type="button"
-          onClick={() => setLiked(toggleWish(product.id).includes(product.id))}
-          aria-label={liked ? "찜 해제" : "찜하기"}
-          aria-pressed={liked}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line ${
-            liked ? "text-brand" : "text-muted"
-          }`}
-        >
-          <IconHeart size={20} />
-        </button>
-        <div className="flex-1">
-          <p className="text-[10.5px] text-muted">총 {qty}개</p>
-          <p className="font-mono text-[15px] font-bold">{priceText(total)}</p>
+      <StoreFooter />
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-panel md:hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5">
+          <button
+            type="button"
+            onClick={() => setLiked(toggleWish(product.id).includes(product.id))}
+            aria-label={liked ? "찜 해제" : "찜하기"}
+            className={`flex h-12 w-12 shrink-0 items-center justify-center border border-line ${
+              liked ? "text-ink" : "text-muted"
+            }`}
+          >
+            <IconHeart size={20} filled={liked} />
+          </button>
+          <button
+            type="button"
+            onClick={add}
+            className="h-12 flex-1 rounded-xl bg-brand text-[14px] font-extrabold text-brand-ink"
+          >
+            {priceText(total)} 담기
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={add}
-          className="flex-1 rounded-lg bg-brand py-3 text-[14px] font-bold text-white active:scale-[0.985]"
-        >
-          장바구니 담기
-        </button>
       </div>
     </main>
   );

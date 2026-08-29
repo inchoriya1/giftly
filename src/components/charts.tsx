@@ -59,7 +59,7 @@ function fillBars(
 function Tip({ left, top, lines }: { left: string; top: string; lines: string[] }) {
   return (
     <div
-      className="pointer-events-none absolute z-10 rounded-md bg-[#0b0b0b] px-2.5 py-1.5 text-[11px] leading-snug whitespace-nowrap text-white shadow-lg"
+      className="pointer-events-none absolute z-10 rounded-xl bg-paper px-2.5 py-1.5 text-[11px] leading-snug whitespace-nowrap text-ink"
       style={{ left, top, transform: "translate(-50%, -115%)" }}
     >
       {lines.map((l, i) => (
@@ -229,11 +229,11 @@ export function BarH({
         return (
           <div key={d.label} className="grid grid-cols-[54px_1fr_auto] items-center gap-2.5">
             <span className="truncate text-[12px] font-semibold">{d.label}</span>
-            <div className="h-5 overflow-hidden rounded-[4px] bg-[#f0efec]">
+            <div className="h-5 overflow-hidden rounded-md bg-edge-2">
               <div
                 data-bar
                 data-to={`${Math.max((d.value / max) * 100, 2)}%`}
-                className="h-full rounded-[4px]"
+                className="h-full rounded-md"
                 style={{
                   width: `${Math.max((d.value / max) * 100, 2)}%`,
                   background: isBest ? BLUE : "#9ec5f4",
@@ -282,11 +282,11 @@ export function Funnel({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-6 flex-1 rounded-[4px] bg-[#f0efec]">
+              <div className="h-6 flex-1 rounded-md bg-edge-2">
                 <div
                   data-bar
                   data-to={`${(s.value / max) * 100}%`}
-                  className="h-full rounded-[4px]"
+                  className="h-full rounded-md"
                   style={{
                     width: `${(s.value / max) * 100}%`,
                     background: FUNNEL_RAMP[i],

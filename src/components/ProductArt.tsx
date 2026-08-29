@@ -13,15 +13,17 @@ import type { Category, Product } from "@/lib/types";
 
 type Palette = { bg: [string, string]; body: string; dark: string; accent: string };
 
+/* 스튜디오 컷처럼 배경은 모두 같은 회색. 상품만 id로 구분합니다. */
+const STUDIO = "#f4f4f4";
 const PALETTES: Palette[] = [
-  { bg: ["#F2E7D7", "#E0CBAE"], body: "#4F6B78", dark: "#38505B", accent: "#C9DDE6" },
-  { bg: ["#EFE1DF", "#DCBDB7"], body: "#7E5049", dark: "#5E3833", accent: "#F0DCD6" },
-  { bg: ["#E8E9DE", "#C9CDB6"], body: "#8A6A44", dark: "#654C2F", accent: "#E5D4B8" },
-  { bg: ["#EBE4ED", "#CCC0D4"], body: "#6E5F7B", dark: "#4E4159", accent: "#DCCFE4" },
-  { bg: ["#E3E9EA", "#C1CFD2"], body: "#39505A", dark: "#26383F", accent: "#8FC7D4" },
-  { bg: ["#F1E8D3", "#DDCCA0"], body: "#5E7A5A", dark: "#41573E", accent: "#CFE0C4" },
-  { bg: ["#EDE6DC", "#D3C3AC"], body: "#6B5B4A", dark: "#4A3E32", accent: "#DDD0BE" },
-  { bg: ["#E6EAF0", "#C4CEDD"], body: "#46566E", dark: "#2F3B4D", accent: "#B8C7DE" },
+  { bg: [STUDIO, STUDIO], body: "#3d4a52", dark: "#2a3338", accent: "#c5d0d4" },
+  { bg: [STUDIO, STUDIO], body: "#6a4540", dark: "#4a2f2c", accent: "#d4c4c0" },
+  { bg: [STUDIO, STUDIO], body: "#6e5638", dark: "#4d3c26", accent: "#d2c6b4" },
+  { bg: [STUDIO, STUDIO], body: "#4a4452", dark: "#322e38", accent: "#c9c4ce" },
+  { bg: [STUDIO, STUDIO], body: "#2f3d44", dark: "#1e282c", accent: "#b7c4c8" },
+  { bg: [STUDIO, STUDIO], body: "#4a5c48", dark: "#334032", accent: "#c4d0c0" },
+  { bg: [STUDIO, STUDIO], body: "#5a4e42", dark: "#3d342c", accent: "#d0c8bc" },
+  { bg: [STUDIO, STUDIO], body: "#3a4658", dark: "#262e3a", accent: "#b8c2d0" },
 ];
 
 function Shape({ c, p }: { c: Category; p: Palette }) {
@@ -162,7 +164,7 @@ export function ProductArt({
   const p = PALETTES[(product.id - 1) % PALETTES.length];
   const gid = `pa${product.id}-${view}`;
   const scale = view === 1 ? 1.42 : 1;
-  const bg: [string, string] = view === 2 ? ["#FBF8F3", "#EFE7DA"] : p.bg;
+  const bg: [string, string] = view === 2 ? ["#fafafa", "#f4f4f4"] : p.bg;
 
   return (
     <svg

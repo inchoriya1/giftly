@@ -1,34 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  /* 상점(/demo) — 따뜻한 커머스 톤 */
-  --color-paper: #fbf8f3;
-  --color-card: #ffffff;
-  --color-ink: #1b1714;
-  --color-muted: #7a6e64;
-  --color-line: #e8dfd4;
-  --color-brand: #8e2a20;
-  --color-brand-soft: #f6eae6;
+  /* 말랑펫(Steam식) 기본 다크 토큰.
+     https://malangpet.xiomeow.com/ :root 값을 그대로 옮겼습니다. */
+  --color-paper: #171a21;
+  --color-card: #22303f;
+  --color-ink: #e8eef5;
+  --color-muted: #93a5b8;
+  --color-line: #33455a;
+  --color-brand: #66c0f4;
+  --color-brand-soft: #1e3a52;
+  --color-brand-ink: #0e1620;
+  --color-acc-ink: #a8dbff;
+  --color-sale: #ff8a7a;
+  --color-studio: #e9eef6;
 
-  /* 대시보드 — 차가운 중성 도구 톤.
-     분석 도구는 데이터에 색을 쓰고 크롬은 물러납니다. */
-  --color-app: #f6f7f8;
-  --color-panel: #ffffff;
-  --color-rail: #14181c;
-  --color-rail-ink: #a8b0b8;
-  --color-rail-on: #ffffff;
-  --color-edge: #e3e6e9;
-  --color-edge-2: #eef0f2;
-  --color-txt: #14181c;
-  --color-txt-2: #5b6570;
-  --color-txt-3: #8b949e;
-  --color-acc: #1c5cab;
-  --color-acc-soft: #eaf1fa;
-  --color-pos: #096b25;
-  --color-neg: #b3261e;
+  --color-app: #171a21;
+  --color-panel: #1b2838;
+  --color-rail: #1b2838;
+  --color-rail-ink: #93a5b8;
+  --color-rail-on: #e8eef5;
+  --color-edge: #33455a;
+  --color-edge-2: #2a3a4c;
+  --color-txt: #e8eef5;
+  --color-txt-2: #93a5b8;
+  --color-txt-3: #7b8ea3;
+  --color-acc: #66c0f4;
+  --color-acc-soft: #1e3a52;
+  --color-pos: #7dcea0;
+  --color-pos-soft: #1e3d2f;
+  --color-neg: #ff8a7a;
+  --color-neg-soft: #3d2428;
+  --color-warn: #e6b35c;
+  --color-warn-soft: #3d3420;
+  /* 차트 크롬은 밝은 배경용으로 고정되어 있어, 그래프만 이 칸에 올립니다. */
+  --color-sheet: #f2f5fa;
+  --color-sheet-ink: #1c2430;
+  --color-sheet-muted: #5e6c80;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif;
+  --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
@@ -37,23 +48,16 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 광고 랜딩(=측정 대상)은 모바일 온리. 대시보드는 이 프레임을 쓰지 않는다. */
-.app-frame {
+.store-wrap {
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  min-height: 100dvh;
-  background: var(--color-paper);
-}
-
-@media (min-width: 520px) {
-  .app-frame {
-    border-left: 1px solid var(--color-line);
-    border-right: 1px solid var(--color-line);
-  }
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
 }
 
 @keyframes fade-up {
@@ -68,11 +72,12 @@ body {
 }
 
 .fade-up {
-  animation: fade-up 0.32s ease both;
+  animation: fade-up 0.4s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fade-up {
-    animation: none;
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }

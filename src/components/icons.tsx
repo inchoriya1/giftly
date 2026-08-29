@@ -14,12 +14,6 @@ const base = (size: number) => ({
   "aria-hidden": true,
 });
 
-export const IconMenu = ({ size = 20, className }: P) => (
-  <svg {...base(size)} className={className}>
-    <path d="M3.5 7h17M3.5 12h17M3.5 17h17" />
-  </svg>
-);
-
 export const IconSearch = ({ size = 20, className }: P) => (
   <svg {...base(size)} className={className}>
     <circle cx="11" cy="11" r="6.5" />
@@ -63,8 +57,16 @@ export const IconUser = ({ size = 20, className }: P) => (
   </svg>
 );
 
-export const IconHeart = ({ size = 20, className }: P) => (
-  <svg {...base(size)} className={className}>
+export const IconHeart = ({
+  size = 20,
+  className,
+  filled = false,
+}: P & { filled?: boolean }) => (
+  <svg
+    {...base(size)}
+    className={className}
+    fill={filled ? "currentColor" : "none"}
+  >
     <path d="M12 20s-7.3-4.6-7.3-9.4A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7.3 2.6C19.3 15.4 12 20 12 20z" />
   </svg>
 );

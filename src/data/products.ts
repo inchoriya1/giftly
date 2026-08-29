@@ -11,6 +11,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 1,
     name: "데일리 텀블러 500ml",
+    brand: "소소키친",
     category: "주방",
     price: 24900,
     listPrice: 35000,
@@ -23,6 +24,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 2,
     name: "보온 보냉병 750ml",
+    brand: "소소키친",
     category: "주방",
     price: 32900,
     listPrice: 42000,
@@ -35,6 +37,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 3,
     name: "코튼 오버셔츠",
+    brand: "느린옷장",
     category: "의류",
     price: 39900,
     listPrice: 59000,
@@ -47,6 +50,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 4,
     name: "브러시드 후드 스웨트",
+    brand: "느린옷장",
     category: "의류",
     price: 45900,
     listPrice: 62000,
@@ -59,6 +63,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 5,
     name: "원목 데스크 정리함",
+    brand: "자리",
     category: "수납",
     price: 32000,
     listPrice: 42000,
@@ -71,6 +76,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 6,
     name: "접이식 수납 박스 2개",
+    brand: "자리",
     category: "수납",
     price: 18900,
     listPrice: 26000,
@@ -83,6 +89,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 7,
     name: "수분 진정 앰플 50ml",
+    brand: "맨들맨들",
     category: "뷰티",
     price: 28000,
     listPrice: 38000,
@@ -95,6 +102,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 8,
     name: "저자극 클렌징 폼",
+    brand: "맨들맨들",
     category: "뷰티",
     price: 15900,
     listPrice: 21000,
@@ -107,6 +115,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 9,
     name: "휴대용 무선 충전기",
+    brand: "플러그",
     category: "디지털",
     price: 34900,
     listPrice: 49000,
@@ -119,6 +128,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 10,
     name: "블루투스 5.3 이어버드",
+    brand: "플러그",
     category: "디지털",
     price: 59000,
     listPrice: 89000,
@@ -131,6 +141,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 11,
     name: "논슬립 요가매트",
+    brand: "움직임",
     category: "운동",
     price: 42000,
     listPrice: 58000,
@@ -143,6 +154,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 12,
     name: "폼롤러 45cm",
+    brand: "움직임",
     category: "운동",
     price: 21900,
     listPrice: 29000,

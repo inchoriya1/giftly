@@ -10,12 +10,12 @@
    anime.js — 숫자 카운트업, SVG 선 그리기, 막대 채우기
 
    대시보드는 읽는 화면입니다. 움직임이 숫자 읽는 걸 방해하면
-   그 애니메이션은 실패입니다. 짧게(0.4~0.7초), 한 번만, 끝나면 정지.
+   그 애니메이션은 실패입니다. 짧게, 한 번만, 끝나면 정지.
    ──────────────────────────────────────────────────────────── */
 
 export const DUR = {
   fast: 0.28,
-  base: 0.42,
+  base: 0.48,
   slow: 0.7,
 } as const;
 
@@ -45,14 +45,14 @@ export function canAnimate(): boolean {
 /* ── Motion variants ───────────────────────────────────────── */
 
 export const fadeUp = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: DUR.base, ease: EASE } },
 };
 
 /** 자식들을 순차로 등장시킵니다. 목록이 "쌓이는" 느낌. */
 export const staggerParent = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
+  show: { transition: { staggerChildren: 0.055, delayChildren: 0.05 } },
 };
 
 /** 업종 탭 전환 — 아래에서 살짝 올라오며 교체 */
