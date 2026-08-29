@@ -17,7 +17,7 @@ import { canAnimate } from "@/lib/anim";
    ──────────────────────────────────────────────────────────── */
 
 const INK = "#0b0b0b";
-const MUTED = "#898781";
+const MUTED = "#5e6c80";   // --color-sheet-muted. 밝은 시트 위 4.85:1
 const GRID = "#e1e0d9";
 const AXIS = "#c3c2b7";
 const BLUE = "#2a78d6";
@@ -296,7 +296,7 @@ export function Funnel({
               {i > 0 ? (
                 <span
                   className="w-[52px] text-right font-mono text-[11px] tabular-nums"
-                  style={{ color: isWorst ? "#d03b3b" : MUTED, fontWeight: isWorst ? 700 : 400 }}
+                  style={{ color: isWorst ? "#b3261e" : MUTED, fontWeight: isWorst ? 700 : 400 }}
                 >
                   −{s.dropFromPrev.toFixed(0)}%
                 </span>
@@ -307,7 +307,7 @@ export function Funnel({
           </div>
         );
       })}
-      <p className="mt-1 text-[11px] text-[#898781]">
+      <p className="mt-1 text-[11px] text-[#5e6c80]">
         오른쪽 숫자는 직전 단계 대비 이탈률입니다. 빨간 값이 최대 병목입니다.
       </p>
     </div>
@@ -411,7 +411,7 @@ export function Heatmap({
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-[#898781]">
+      <p className="mt-2 text-[11px] text-[#5e6c80]">
         칸의 숫자는 전환율(%)입니다. 진할수록 높습니다.
       </p>
     </div>
