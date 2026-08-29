@@ -3,7 +3,7 @@
 광고 성과를 읽고 **「다음에 무엇을 할지」까지 제안하는** 대시보드.
 
 청년 K-뉴딜 아카데미 Adobe AI 콘텐츠 마케팅 과정 — AGM 1기 · 대전 한남대학교 캡스톤.
-**배포: https://giftly-sable-mu.vercel.app/**
+**배포: https://agm-adcompass.vercel.app/**
 
 ---
 

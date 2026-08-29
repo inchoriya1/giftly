@@ -164,28 +164,36 @@ export default function Dashboard() {
                 },
               ] as const
             ).map((m) => {
-              const good =
-                "d" in m && m.d !== undefined
-                  ? m.up
-                    ? m.d > 0
-                    : m.d < 0
-                  : null;
+              const has = "d" in m && m.d !== undefined;
+              /* 소수 첫째 자리까지만 보여주므로, 그 아래는 「변동 없음」으로 봅니다.
+                 이 처리가 없으면 0.0% 가 ▼ 빨강으로 나옵니다. */
+              const flat = has && Math.abs(m.d) < 0.05;
+              const good = has && !flat && (m.up ? m.d > 0 : m.d < 0);
               return (
                 <div
                   key={m.label}
                   className="rounded-xl border border-line bg-card px-4 py-3"
                 >
-                  <p className="text-[12px] text-txt-2">{m.label}</p>
+                  <p className="text-[12px] text-txt-2">
+                    {m.label}
+                    {"up" in m && m.up === false && (
+                      <span className="ml-1 text-txt-3">(낮을수록 좋음)</span>
+                    )}
+                  </p>
                   <p className="mt-1.5 text-[26px] leading-none tabular-nums">
                     <CountUp value={m.n} format={m.fmt} />
                   </p>
-                  {"d" in m && m.d !== undefined ? (
+                  {has ? (
                     <p
                       className={`mt-2 text-[12px] tabular-nums ${
-                        good ? "text-pos" : "text-neg"
+                        flat ? "text-txt-3" : good ? "text-pos" : "text-neg"
                       }`}
                     >
-                      {m.d > 0 ? "▲" : "▼"} {Math.abs(m.d).toFixed(1)}%
+                      {flat ? "—" : m.d > 0 ? "▲" : "▼"}{" "}
+                      {Math.abs(m.d).toFixed(1)}%
+                      <span className="ml-1">
+                        {flat ? "변동 없음" : good ? "개선" : "악화"}
+                      </span>
                     </p>
                   ) : (
                     <p className="mt-2 text-[12px] text-txt-3">이전 기간 대비 —</p>
@@ -194,6 +202,12 @@ export default function Dashboard() {
               );
             })}
           </div>
+
+          <p className="mt-2 text-[12px] leading-relaxed text-txt-3">
+            색은 <strong className="font-semibold text-txt-2">오르내림이 아니라
+            좋고 나쁨</strong>을 나타냅니다. 그래서 CPA는 ▼(하락)가 초록이고,
+            전환은 ▼가 빨강입니다. 화살표는 방향, 색은 평가입니다.
+          </p>
 
           <div className="mt-3">
             <Panel title="일자별 전환" note={`${days}일 · 채널 합산`} well>
