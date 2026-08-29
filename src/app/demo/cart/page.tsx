@@ -73,7 +73,23 @@ export default function CartPage() {
 
   async function purchase() {
     setBusy(true);
-    track("purchase", { product_id: product!.id, qty, value: total });
+    /* GA4 는 transaction_id 로 중복 주문을 제거합니다.
+       주문번호를 먼저 만들어 이벤트와 완료 화면이 같은 값을 쓰게 합니다. */
+    const orderNo = makeOrderNo();
+    track("purchase", {
+      transaction_id: orderNo,
+      product_id: product!.id,
+      qty,
+      value: total,
+      items: [
+        {
+          item_id: String(product!.id),
+          item_name: product!.name,
+          price: product!.price,
+          quantity: qty,
+        },
+      ],
+    });
 
     if (supabase) {
       const { sessionId, variant: v } = ensureSession();
@@ -90,7 +106,6 @@ export default function CartPage() {
       }
     }
 
-    const orderNo = makeOrderNo();
     clearCart();
     router.push(`/demo/done?no=${orderNo}&amt=${total}`);
   }

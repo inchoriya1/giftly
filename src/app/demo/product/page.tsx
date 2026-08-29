@@ -58,7 +58,19 @@ function ProductDetail() {
 
   function add() {
     addToCart(product.id, qty);
-    track("add_to_cart", { product_id: product.id, qty, value: total });
+    track("add_to_cart", {
+      product_id: product.id,
+      qty,
+      value: total,
+      items: [
+        {
+          item_id: String(product.id),
+          item_name: product.name,
+          price: product.price,
+          quantity: qty,
+        },
+      ],
+    });
     router.push("/demo/cart");
   }
 
