@@ -32,14 +32,14 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-dvh bg-paper text-ink">
-      <nav className="sticky top-0 z-30 flex items-center gap-4 border-b border-line bg-panel/90 px-4 py-2.5 backdrop-blur-md">
-        <Link href="/" className="text-[16px] font-extrabold text-brand">
+      <nav className="sticky top-0 z-30 flex items-center gap-4 bg-rail px-4 py-2.5 text-rail-on">
+        <Link href="/" className="text-[16px] font-extrabold text-rail-on">
           AdCompass
         </Link>
         <div className="hidden items-center gap-3 md:flex">
           {SECTIONS.map((s) => {
             const isOn = page === "dash" && active === s.id;
-            const cls = `text-[14px] ${isOn ? "font-bold text-ink" : "text-muted hover:text-ink"}`;
+            const cls = `text-[14px] ${isOn ? "font-bold text-rail-on" : "text-rail-ink hover:text-rail-on"}`;
             return page === "dash" && onNavigate ? (
               <button
                 key={s.id}
@@ -61,7 +61,7 @@ export function AppShell({
           {toolbar}
           <Link
             href="/demo"
-            className="rounded-lg border border-line bg-card px-2.5 py-1 text-[13px] text-ink"
+            className="rounded-lg border border-white/25 px-2.5 py-1 text-[13px] text-rail-on hover:bg-white/10"
           >
             샘플 랜딩
           </Link>
@@ -69,8 +69,8 @@ export function AppShell({
             href="/admin"
             className={`rounded-lg border px-2.5 py-1 text-[13px] ${
               page === "admin"
-                ? "border-brand bg-brand-soft font-bold text-acc-ink"
-                : "border-line bg-card text-ink"
+                ? "border-transparent bg-card font-bold text-brand"
+                : "border-white/25 text-rail-on hover:bg-white/10"
             }`}
           >
             수집 원본
@@ -140,10 +140,12 @@ export function Segmented<T extends string | number>({
           type="button"
           onClick={() => onChange(o.value)}
           aria-pressed={value === o.value}
+          /* 네이비 헤더 위에 얹히므로 선택 상태를 흰 알약으로 씁니다.
+             bg-brand 를 쓰면 헤더와 같은 네이비라 선택이 사라집니다. */
           className={`rounded-full px-3 py-1 text-[13px] font-bold ${
             value === o.value
-              ? "bg-brand text-brand-ink"
-              : "border border-line bg-card text-ink"
+              ? "bg-card text-brand"
+              : "border border-white/25 text-rail-on hover:bg-white/10"
           }`}
         >
           {o.label}
@@ -166,11 +168,11 @@ export function Select<T extends string>({
 }) {
   return (
     <label className="flex items-center gap-2">
-      <span className="text-[13px] text-muted">{label}</span>
+      <span className="text-[13px] text-rail-ink">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="h-8 rounded-lg border border-line bg-card px-2 text-[13px] text-ink outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        className="h-8 rounded-lg border border-line bg-card px-2 text-[13px] text-ink outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -225,10 +227,13 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <div className={`overflow-hidden rounded-xl border border-line bg-panel ${className}`}>
+    <div
+      className={`overflow-hidden rounded-xl bg-panel shadow-sm ring-1 ring-black/5 ${className}`}
+    >
+      {/* 수자인 카드의 상단 브랜드 스트립. 대시보드는 패널이 많아 6px → 3px로 줄였습니다. */}
+      {title && <div className="h-[3px] bg-brand" />}
       {title && (
-        <div className="flex items-center gap-2 border-b border-line bg-card px-3.5 py-2">
-          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-brand" />
+        <div className="flex items-center gap-2 border-b border-line px-3.5 py-2">
           <h3 className="text-[13px] font-bold">{title}</h3>
           {note && (
             <span className="ml-auto text-[12px] font-medium text-muted">{note}</span>

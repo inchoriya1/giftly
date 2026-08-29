@@ -16,10 +16,10 @@ import { canAnimate } from "@/lib/anim";
    데이터가 바뀔 때(업종 전환) 한 번 재생되고 멈춥니다.
    ──────────────────────────────────────────────────────────── */
 
-const INK = "#0b0b0b";
+const INK = "#17202a";
 const MUTED = "#5e6c80";   // --color-sheet-muted. 밝은 시트 위 4.85:1
-const GRID = "#e1e0d9";
-const AXIS = "#c3c2b7";
+const GRID = "#e5e9ed";
+const AXIS = "#c2cad2";
 const BLUE = "#2a78d6";
 const GREEN = "#008300";
 const FUNNEL_RAMP = ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#104281"];
@@ -242,7 +242,7 @@ export function BarH({
             </div>
             <span
               className="w-[74px] text-right font-mono text-[12px] tabular-nums"
-              style={{ color: isBest ? INK : "#52514e", fontWeight: isBest ? 700 : 400 }}
+              style={{ color: isBest ? INK : "#52606d", fontWeight: isBest ? 700 : 400 }}
             >
               {format(d.value)}
             </span>
@@ -383,7 +383,7 @@ export function Heatmap({
         ))}
         {rows.map((r) => (
           <div key={r} className="contents">
-            <div className="flex items-center font-mono text-[11px] text-[#52514e]">{r}</div>
+            <div className="flex items-center font-mono text-[11px] text-[#52606d]">{r}</div>
             {cols.map((c) => {
               const cell = cells.find((x) => x.row === r && x.col === c);
               if (!cell) return <div key={c} />;
@@ -474,7 +474,7 @@ export function AbBars({
                 }}
               />
             </div>
-            <span className="font-mono text-[11px] text-[#52514e] tabular-nums">
+            <span className="font-mono text-[11px] text-[#52606d] tabular-nums">
               {it.conversions.toLocaleString("ko-KR")} / {it.sessions.toLocaleString("ko-KR")}
             </span>
           </div>
@@ -484,8 +484,8 @@ export function AbBars({
       <div
         className="rounded-lg px-3 py-2 text-[11.5px] leading-relaxed"
         style={{
-          background: significant ? "#e8f4e8" : "#f0efec",
-          color: significant ? "#0b5f0b" : "#52514e",
+          background: significant ? "#e6f4ea" : "#eef1f4",
+          color: significant ? "#096b25" : "#52606d",
         }}
       >
         {significant ? (

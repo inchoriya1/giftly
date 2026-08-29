@@ -1,42 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  /* 말랑펫(Steam식) 기본 다크 토큰.
-     https://malangpet.xiomeow.com/ :root 값을 그대로 옮겼습니다. */
-  --color-paper: #171a21;
-  --color-card: #22303f;
-  --color-ink: #e8eef5;
-  --color-muted: #93a5b8;
-  --color-line: #33455a;
-  --color-brand: #66c0f4;
-  --color-brand-soft: #1e3a52;
-  --color-brand-ink: #0e1620;
-  --color-acc-ink: #a8dbff;
-  --color-sale: #ff8a7a;
-  --color-studio: #e9eef6;
+  /* 수자인 로이센트 포털의 디자인 언어를 옮겼습니다.
+     네이비 BI + 흰 카드 + 밝은 회색 바닥.
+     차트 팔레트(charts.tsx)가 원래 밝은 배경용으로 검증된 색이라,
+     밝은 테마로 오면서 「밝은 시트」 우회가 필요 없어졌습니다. */
+  --color-paper: #f4f6f8;
+  --color-card: #ffffff;
+  --color-ink: #17202a;
+  --color-muted: #52606d;
+  --color-line: #e3e8ed;
+  --color-brand: #00486e;
+  --color-brand-deep: #00344f;
+  --color-brand-soft: #e7eff4;
+  --color-brand-line: #cfdde6;
+  /* 브랜드 배경 위에 얹는 글자색. 네이비가 어두우므로 흰색입니다. */
+  --color-brand-ink: #ffffff;
+  --color-acc-ink: #00344f;
+  --color-sale: #b3261e;
+  --color-studio: #eef1f4;
 
-  --color-app: #171a21;
-  --color-panel: #1b2838;
-  --color-rail: #1b2838;
-  --color-rail-ink: #93a5b8;
-  --color-rail-on: #e8eef5;
-  --color-edge: #33455a;
-  --color-edge-2: #2a3a4c;
-  --color-txt: #e8eef5;
-  --color-txt-2: #93a5b8;
-  --color-txt-3: #9db0c4;
-  --color-acc: #66c0f4;
-  --color-acc-soft: #1e3a52;
-  --color-pos: #7dcea0;
-  --color-pos-soft: #1e3d2f;
-  --color-neg: #ff8a7a;
-  --color-neg-soft: #3d2428;
-  --color-warn: #e6b35c;
-  --color-warn-soft: #3d3420;
-  /* 차트 크롬은 밝은 배경용으로 고정되어 있어, 그래프만 이 칸에 올립니다. */
-  --color-sheet: #f2f5fa;
-  --color-sheet-ink: #1c2430;
-  --color-sheet-muted: #5e6c80;
+  --color-app: #f4f6f8;
+  --color-panel: #ffffff;
+  --color-rail: #00486e;
+  --color-rail-ink: #b9cddb;
+  --color-rail-on: #ffffff;
+  --color-edge: #e3e8ed;
+  --color-edge-2: #eef1f4;
+  --color-txt: #17202a;
+  --color-txt-2: #52606d;
+  --color-txt-3: #556270;
+  --color-acc: #00486e;
+  --color-acc-soft: #e7eff4;
+  --color-pos: #096b25;
+  --color-pos-soft: #e6f4ea;
+  --color-neg: #b3261e;
+  --color-neg-soft: #f8e8e6;
+  --color-warn: #8a5b00;
+  --color-warn-soft: #f6edd8;
+  /* 카드 안에서 한 단계 눌러 보이게 하는 바탕 (Panel well) */
+  --color-sheet: #f4f6f8;
+  --color-sheet-ink: #17202a;
+  --color-sheet-muted: #52606d;
 
   --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
     "Malgun Gothic", sans-serif;
